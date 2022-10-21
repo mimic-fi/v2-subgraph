@@ -1,0 +1,28 @@
+{
+  "name": "@mimic-fi/v2-subgraph",
+  "private": true,
+  "version": "0.0.1",
+  "license": "GPL-3.0",
+  "scripts": {
+    "lint": "eslint . --ext .ts",
+    "build:goerli": "NETWORK=goerli ./scripts/build.sh",
+    "build:matic": "NETWORK=matic ./scripts/build.sh",
+    "build:mainnet": "NETWORK=mainnet ./scripts/build.sh",
+    "deploy:goerli": "NETWORK=goerli ./scripts/deploy.sh",
+    "deploy:matic": "NETWORK=matic ./scripts/deploy.sh",
+    "deploy:mainnet": "NETWORK=mainnet ./scripts/deploy.sh"
+  },
+  "dependencies": {
+    "@mimic-fi/v2-wallet": "0.0.7",
+    "@mimic-fi/v2-smart-vault": "0.0.5",
+    "@mimic-fi/v2-registry": "0.0.5"
+  },
+  "devDependencies": {
+    "@graphprotocol/graph-cli": "^0.35.0",
+    "@graphprotocol/graph-ts": "^0.28.1",
+    "@typescript-eslint/eslint-plugin": "^4.1.1",
+    "@typescript-eslint/parser": "^4.1.1",
+    "eslint": "^7.9.0",
+    "typescript": "^4.3.4"
+  }
+}
