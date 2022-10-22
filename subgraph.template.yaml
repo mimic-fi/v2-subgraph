@@ -51,6 +51,8 @@ templates:
           file: ./node_modules/@mimic-fi/v2-smart-vault/artifacts/contracts/ISmartVault.sol/ISmartVault.json
         - name: Wallet
           file: ./node_modules/@mimic-fi/v2-wallet/artifacts/contracts/IWallet.sol/IWallet.json
+        - name: ERC20
+          file: ./abi/IERC20.json
       eventHandlers:
         - event: WalletSet(indexed address)
           handler: handleWalletSet
@@ -99,6 +101,8 @@ templates:
       abis:
         - name: Wallet
           file: ./node_modules/@mimic-fi/v2-wallet/artifacts/contracts/IWallet.sol/IWallet.json
+        - name: ERC20
+          file: ./abi/IERC20.json
       eventHandlers:
         - event: Call(indexed address,bytes,uint256,bytes,bytes)
           handler: handleCall
