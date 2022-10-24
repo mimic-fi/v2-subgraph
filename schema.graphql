@@ -56,7 +56,7 @@ type Wallet implements Authorizer @entity {
   swapConnector: String!
   strategies: [String!]!
   feeCollector: String!
-  wrappedNativeToken: String!
+  wrappedNativeToken: ERC20!
   swapFee: FeeConfig @derivedFrom(field: "wallet")
   withdrawFee: FeeConfig @derivedFrom(field: "wallet")
   performanceFee: FeeConfig @derivedFrom(field: "wallet")

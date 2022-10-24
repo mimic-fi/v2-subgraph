@@ -101,6 +101,8 @@ templates:
       abis:
         - name: Wallet
           file: ./node_modules/@mimic-fi/v2-wallet/artifacts/contracts/IWallet.sol/IWallet.json
+        - name: Strategy
+          file: ./node_modules/@mimic-fi/v2-strategies/artifacts/contracts/IStrategy.sol/IStrategy.json
         - name: ERC20
           file: ./abi/IERC20.json
       eventHandlers:

@@ -15,6 +15,7 @@
   "dependencies": {
     "@mimic-fi/v2-wallet": "0.0.7",
     "@mimic-fi/v2-smart-vault": "0.0.5",
+    "@mimic-fi/v2-strategies": "0.0.4",
     "@mimic-fi/v2-registry": "0.0.5"
   },
   "devDependencies": {
