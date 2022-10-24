@@ -8,9 +8,6 @@
   <a href="https://github.com/mimic-fi/v2-subgraph/actions/workflows/ci.yml">
     <img src="https://github.com/mimic-fi/v2-subgraph/actions/workflows/ci.yml/badge.svg" alt="CI">
   </a>
-  <a href="https://badge.fury.io/js/@mimic-fi%2Fv1-vault">
-    <img src="https://badge.fury.io/js/@mimic-fi%2Fv1-vault.svg" alt="NPM">
-  </a>
   <a href="https://discord.mimic.fi">
     <img src="https://img.shields.io/discourse/status?server=https%3A%2F%2Fmeta.discourse.org" alt="Discord">
   </a>
