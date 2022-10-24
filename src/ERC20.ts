@@ -1,9 +1,25 @@
-import { Address, log } from '@graphprotocol/graph-ts'
+import { Address, dataSource, log } from '@graphprotocol/graph-ts'
 
 import { ERC20 as ERC20Entity } from '../types/schema'
 import { ERC20 as ERC20Contract } from '../types/Registry/ERC20'
 
 const NATIVE_TOKEN_ADDRESS = Address.fromString('0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee')
+
+function getNativeTokenSymbol(): string {
+  let network = dataSource.network()
+  if (network == 'goerli') return 'ETH'
+  if (network == 'mainnet') return 'ETH'
+  if (network == 'polygon') return 'MATIC'
+  return 'Unknown'
+}
+
+function getNativeTokenName(): string {
+  let network = dataSource.network()
+  if (network == 'goerli') return 'Ether'
+  if (network == 'mainnet') return 'Ether'
+  if (network == 'polygon') return 'Matic'
+  return 'Unknown'
+}
 
 export function loadOrCreateNativeToken(): ERC20Entity {
   let id = NATIVE_TOKEN_ADDRESS.toHexString()
@@ -11,8 +27,8 @@ export function loadOrCreateNativeToken(): ERC20Entity {
 
   if (erc20 === null) {
     erc20 = new ERC20Entity(id)
-    erc20.name = 'Native Token'
-    erc20.symbol = 'NTK'
+    erc20.name = getNativeTokenName()
+    erc20.symbol = getNativeTokenSymbol()
     erc20.decimals = 18
     erc20.save()
   }
