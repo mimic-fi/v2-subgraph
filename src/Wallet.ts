@@ -46,19 +46,19 @@ export function handleCall(event: Call): void {
 
 export function handleCollect(event: Collect): void {
   let wallet = Wallet.load(event.address.toHexString())!
-  let token = loadOrCreateERC20(event.params.token)
-  let balance = loadOrCreateBalance(wallet, token)
 
-  balance.amount = balance.amount.plus(event.params.collected)
-  balance.save()
+  let tokenOut = loadOrCreateERC20(event.params.token)
+  let balanceOut = loadOrCreateBalance(wallet, tokenOut)
+  balanceOut.amount = balanceOut.amount.plus(event.params.collected)
+  balanceOut.save()
 
   let executionId = wallet.id + '/executions/' + getTransactionId(event)
   let execution = new PrimitiveExecution(executionId)
   execution.type = 'Collect'
   execution.vault = wallet.vault
   execution.wallet = wallet.id
-  execution.tokenIn = token.id
-  execution.amountIn = event.params.collected
+  execution.tokenOut = tokenOut.id
+  execution.amountOut = event.params.collected
   execution.data = event.params.data.toHexString()
   execution.executedAt = event.block.timestamp
   execution.transaction = event.transaction.hash.toHexString()
@@ -67,19 +67,19 @@ export function handleCollect(event: Collect): void {
 
 export function handleWithdraw(event: Withdraw): void {
   let wallet = Wallet.load(event.address.toHexString())!
-  let token = loadOrCreateERC20(event.params.token)
-  let balance = loadOrCreateBalance(wallet, token)
 
-  balance.amount = balance.amount.minus(event.params.withdrawn)
-  balance.save()
+  let tokenIn = loadOrCreateERC20(event.params.token)
+  let balanceIn = loadOrCreateBalance(wallet, tokenIn)
+  balanceIn.amount = balanceIn.amount.minus(event.params.withdrawn)
+  balanceIn.save()
 
   let executionId = wallet.id + '/executions/' + getTransactionId(event)
   let execution = new PrimitiveExecution(executionId)
   execution.type = 'Withdraw'
   execution.vault = wallet.vault
   execution.wallet = wallet.id
-  execution.tokenOut = token.id
-  execution.amountOut = event.params.withdrawn
+  execution.tokenIn = tokenIn.id
+  execution.amountIn = event.params.withdrawn
   execution.data = event.params.data.toHexString()
   execution.executedAt = event.block.timestamp
   execution.transaction = event.transaction.hash.toHexString()
@@ -91,7 +91,7 @@ export function handleWithdraw(event: Withdraw): void {
     fee.vault = wallet.vault
     fee.wallet = wallet.id
     fee.primitive = execution.id
-    fee.token = token.id
+    fee.token = tokenIn.id
     fee.amount = event.params.fee
     fee.pct = getWithdrawFeePct(event.address)
     fee.feeCollector = getFeeCollector(event.address)
@@ -102,15 +102,15 @@ export function handleWithdraw(event: Withdraw): void {
 export function handleWrap(event: Wrap): void {
   let wallet = Wallet.load(event.address.toHexString())!
 
-  let tokenOut = loadOrCreateNativeToken()
-  let balanceOut = loadOrCreateBalance(wallet, tokenOut)
-  balanceOut.amount = balanceOut.amount.minus(event.params.wrapped)
-  balanceOut.save()
-
-  let tokenIn = ERC20.load(wallet.wrappedNativeToken)!
+  let tokenIn = loadOrCreateNativeToken()
   let balanceIn = loadOrCreateBalance(wallet, tokenIn)
-  balanceIn.amount = balanceIn.amount.plus(event.params.wrapped)
+  balanceIn.amount = balanceIn.amount.minus(event.params.wrapped)
   balanceIn.save()
+
+  let tokenOut = ERC20.load(wallet.wrappedNativeToken)!
+  let balanceOut = loadOrCreateBalance(wallet, tokenOut)
+  balanceOut.amount = balanceOut.amount.plus(event.params.wrapped)
+  balanceOut.save()
 
   let executionId = wallet.id + '/executions/' + getTransactionId(event)
   let execution = new PrimitiveExecution(executionId)
@@ -130,15 +130,15 @@ export function handleWrap(event: Wrap): void {
 export function handleUnwrap(event: Unwrap): void {
   let wallet = Wallet.load(event.address.toHexString())!
 
-  let tokenOut = ERC20.load(wallet.wrappedNativeToken)!
-  let balanceOut = loadOrCreateBalance(wallet, tokenOut)
-  balanceOut.amount = balanceOut.amount.minus(event.params.unwrapped)
-  balanceOut.save()
-
-  let tokenIn = loadOrCreateNativeToken()
+  let tokenIn = ERC20.load(wallet.wrappedNativeToken)!
   let balanceIn = loadOrCreateBalance(wallet, tokenIn)
-  balanceIn.amount = balanceIn.amount.plus(event.params.unwrapped)
+  balanceIn.amount = balanceIn.amount.minus(event.params.unwrapped)
   balanceIn.save()
+
+  let tokenOut = loadOrCreateNativeToken()
+  let balanceOut = loadOrCreateBalance(wallet, tokenOut)
+  balanceOut.amount = balanceOut.amount.plus(event.params.unwrapped)
+  balanceOut.save()
 
   let executionId = wallet.id + '/executions/' + getTransactionId(event)
   let execution = new PrimitiveExecution(executionId)
@@ -161,18 +161,18 @@ export function handleClaim(event: Claim): void {
   let eventAmounts = event.params.amounts
 
   for (let i: i32 = 0; i < eventTokens.length; i++) {
-    let tokenIn = loadOrCreateNativeToken()
-    let balance = loadOrCreateBalance(wallet, tokenIn)
-    balance.amount = balance.amount.plus(eventAmounts[i])
-    balance.save()
+    let tokenOut = loadOrCreateNativeToken()
+    let balanceOut = loadOrCreateBalance(wallet, tokenOut)
+    balanceOut.amount = balanceOut.amount.plus(eventAmounts[i])
+    balanceOut.save()
 
     let executionId = wallet.id + '/executions/' + getTransactionId(event) + '/' + i.toString()
     let execution = new PrimitiveExecution(executionId)
     execution.type = 'Claim'
     execution.vault = wallet.vault
     execution.wallet = wallet.id
-    execution.tokenIn = tokenIn.id
-    execution.amountIn = eventAmounts[i]
+    execution.tokenOut = tokenOut.id
+    execution.amountOut = eventAmounts[i]
     execution.data = event.params.data.toHexString()
     execution.executedAt = event.block.timestamp
     execution.transaction = event.transaction.hash.toHexString()
@@ -182,19 +182,19 @@ export function handleClaim(event: Claim): void {
 
 export function handleJoin(event: Join): void {
   let wallet = Wallet.load(event.address.toHexString())!
-  let token = loadOrCreateERC20(getStrategyToken(event.params.strategy))
-  let balance = loadOrCreateBalance(wallet, token)
 
-  balance.amount = balance.amount.minus(event.params.invested)
-  balance.save()
+  let tokenIn = loadOrCreateERC20(getStrategyToken(event.params.strategy))
+  let balanceIn = loadOrCreateBalance(wallet, tokenIn)
+  balanceIn.amount = balanceIn.amount.minus(event.params.invested)
+  balanceIn.save()
 
   let executionId = wallet.id + '/executions/' + getTransactionId(event)
   let execution = new PrimitiveExecution(executionId)
   execution.type = 'Join'
   execution.vault = wallet.vault
   execution.wallet = wallet.id
-  execution.tokenOut = token.id
-  execution.amountOut = event.params.invested
+  execution.tokenIn = tokenIn.id
+  execution.amountIn = event.params.invested
   execution.data = event.params.data.toHexString()
   execution.executedAt = event.block.timestamp
   execution.transaction = event.transaction.hash.toHexString()
@@ -205,19 +205,19 @@ export function handleJoin(event: Join): void {
 
 export function handleExit(event: Exit): void {
   let wallet = Wallet.load(event.address.toHexString())!
-  let token = loadOrCreateERC20(getStrategyToken(event.params.strategy))
-  let balance = loadOrCreateBalance(wallet, token)
 
-  balance.amount = balance.amount.plus(event.params.received)
-  balance.save()
+  let tokenOut = loadOrCreateERC20(getStrategyToken(event.params.strategy))
+  let balanceOut = loadOrCreateBalance(wallet, tokenOut)
+  balanceOut.amount = balanceOut.amount.plus(event.params.received)
+  balanceOut.save()
 
   let executionId = wallet.id + '/executions/' + getTransactionId(event)
   let execution = new PrimitiveExecution(executionId)
   execution.type = 'Exit'
   execution.vault = wallet.vault
   execution.wallet = wallet.id
-  execution.tokenIn = token.id
-  execution.amountIn = event.params.received
+  execution.tokenOut = tokenOut.id
+  execution.amountOut = event.params.received
   execution.data = event.params.data.toHexString()
   execution.executedAt = event.block.timestamp
   execution.transaction = event.transaction.hash.toHexString()
@@ -231,7 +231,7 @@ export function handleExit(event: Exit): void {
     fee.vault = wallet.vault
     fee.wallet = wallet.id
     fee.primitive = execution.id
-    fee.token = token.id
+    fee.token = tokenOut.id
     fee.amount = event.params.fee
     fee.pct = getPerformanceFeePct(event.address)
     fee.feeCollector = getFeeCollector(event.address)
@@ -242,17 +242,15 @@ export function handleExit(event: Exit): void {
 export function handleSwap(event: Swap): void {
   let wallet = Wallet.load(event.address.toHexString())!
 
-  // The token in for the swap is the token out in the wallet
-  let tokenOut = loadOrCreateERC20(event.params.tokenIn)
-  let balanceOut = loadOrCreateBalance(wallet, tokenOut)
-  balanceOut.amount = balanceOut.amount.minus(event.params.amountIn)
-  balanceOut.save()
-
-  // The token in for the swap is the token out in the wallet
-  let tokenIn = loadOrCreateERC20(event.params.tokenOut)
+  let tokenIn = loadOrCreateERC20(event.params.tokenIn)
   let balanceIn = loadOrCreateBalance(wallet, tokenIn)
-  balanceIn.amount = balanceIn.amount.plus(event.params.amountOut)
+  balanceIn.amount = balanceIn.amount.minus(event.params.amountIn)
   balanceIn.save()
+
+  let tokenOut = loadOrCreateERC20(event.params.tokenOut)
+  let balanceOut = loadOrCreateBalance(wallet, tokenOut)
+  balanceOut.amount = balanceOut.amount.plus(event.params.amountOut)
+  balanceOut.save()
 
   let executionId = wallet.id + '/executions/' + getTransactionId(event)
   let execution = new PrimitiveExecution(executionId)
@@ -260,9 +258,9 @@ export function handleSwap(event: Swap): void {
   execution.vault = wallet.vault
   execution.wallet = wallet.id
   execution.tokenIn = tokenIn.id
-  execution.amountIn = event.params.amountOut
+  execution.amountIn = event.params.amountIn
   execution.tokenOut = tokenOut.id
-  execution.amountOut = event.params.amountIn
+  execution.amountOut = event.params.amountOut
   execution.data = event.params.data.toHexString()
   execution.executedAt = event.block.timestamp
   execution.transaction = event.transaction.hash.toHexString()
@@ -276,7 +274,7 @@ export function handleSwap(event: Swap): void {
     fee.vault = wallet.vault
     fee.wallet = wallet.id
     fee.primitive = execution.id
-    fee.token = tokenIn.id
+    fee.token = tokenOut.id
     fee.amount = event.params.fee
     fee.pct = getSwapFeePct(event.address)
     fee.feeCollector = getFeeCollector(event.address)
