@@ -24,71 +24,30 @@ type Instance @entity {
 
 type SmartVault implements Authorizer @entity {
   id: ID!
-  wallet: Wallet! @derivedFrom(field: "vault")
-  actions: [Action!] @derivedFrom(field: "vault")
-  actionExecutions: [ActionExecution!] @derivedFrom(field: "vault")
-  permissions: [Permission!] @derivedFrom(field: "target")
-}
-
-type Action implements Authorizer @entity {
-  id: ID!
-  vault: SmartVault!
-  allowed: Boolean!
-  executions: [ActionExecution!] @derivedFrom(field: "action")
-  permissions: [Permission!] @derivedFrom(field: "target")
-}
-
-type ActionExecution @entity {
-  id: ID!
-  action: Action!
-  vault: SmartVault!
-  executor: String!
-  executedAt: BigInt!
-  transaction: String!
-}
-
-type Wallet implements Authorizer @entity {
-  id: ID!
-  vault: SmartVault!
-  balances: [Balance!] @derivedFrom(field: "wallet")
-  priceFeeds: [PriceFeed!] @derivedFrom(field: "wallet")
+  balances: [Balance!] @derivedFrom(field: "smartVault")
+  priceFeeds: [PriceFeed!] @derivedFrom(field: "smartVault")
   priceOracle: String!
   swapConnector: String!
   strategies: [String!]!
   feeCollector: String!
   wrappedNativeToken: ERC20!
-  swapFee: FeeConfig @derivedFrom(field: "wallet")
-  withdrawFee: FeeConfig @derivedFrom(field: "wallet")
-  performanceFee: FeeConfig @derivedFrom(field: "wallet")
-  paidFees: [FeePaid!] @derivedFrom(field: "wallet")
-  primitiveExecutions: [PrimitiveExecution!] @derivedFrom(field: "wallet")
+  swapFee: FeeConfig @derivedFrom(field: "smartVault")
+  withdrawFee: FeeConfig @derivedFrom(field: "smartVault")
+  performanceFee: FeeConfig @derivedFrom(field: "smartVault")
+  paidFees: [FeePaid!] @derivedFrom(field: "smartVault")
+  primitiveExecutions: [PrimitiveExecution!] @derivedFrom(field: "smartVault")
   permissions: [Permission!] @derivedFrom(field: "target")
 }
 
 type PrimitiveExecution @entity {
   id: ID!
   type: Primitive!
-  vault: SmartVault!
-  wallet: Wallet!
-  tokenIn: ERC20
-  amountIn: BigInt
-  tokenOut: ERC20
-  amountOut: BigInt
+  smartVault: SmartVault!
   data: String!
   executedAt: BigInt!
   transaction: String!
-  fee: FeePaid @derivedFrom(field: "primitive")
-}
-
-type FeePaid @entity {
-  id: ID!
-  vault: SmartVault!
-  wallet: Wallet!
-  primitive: PrimitiveExecution!
-  pct: BigInt!
-  token: ERC20!
-  amount: BigInt!
-  feeCollector: String!
+  fee: FeePaid @derivedFrom(field: "primitiveExecution")
+  movements: [Movement!] @derivedFrom(field: "primitiveExecution")
 }
 
 enum Primitive {
@@ -104,10 +63,33 @@ enum Primitive {
   Bridge
 }
 
+type Movement @entity {
+  id: ID!
+  type: MovementType!
+  token: ERC20!
+  amount: BigInt!
+  smartVault: SmartVault!
+  primitiveExecution: PrimitiveExecution!
+}
+
+enum MovementType {
+  In
+  Out
+}
+
+type FeePaid @entity {
+  id: ID!
+  smartVault: SmartVault!
+  primitiveExecution: PrimitiveExecution!
+  pct: BigInt!
+  token: ERC20!
+  amount: BigInt!
+  feeCollector: String!
+}
+
 type PriceFeed @entity {
   id: ID!
-  vault: SmartVault!
-  wallet: Wallet!
+  smartVault: SmartVault!
   base: ERC20!
   quote: ERC20!
   feed: String!
@@ -115,8 +97,7 @@ type PriceFeed @entity {
 
 type FeeConfig @entity {
   id: ID!
-  vault: SmartVault!
-  wallet: Wallet!
+  smartVault: SmartVault!
   pct: BigInt!
   cap: BigInt!
   token: ERC20!
@@ -125,8 +106,7 @@ type FeeConfig @entity {
 
 type Balance @entity {
   id: ID!
-  vault: SmartVault!
-  wallet: Wallet!
+  smartVault: SmartVault!
   token: ERC20!
   amount: BigInt!
 }

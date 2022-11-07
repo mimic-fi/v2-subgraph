@@ -49,58 +49,6 @@ templates:
       abis:
         - name: SmartVault
           file: ./node_modules/@mimic-fi/v2-smart-vault/artifacts/contracts/ISmartVault.sol/ISmartVault.json
-        - name: Wallet
-          file: ./node_modules/@mimic-fi/v2-wallet/artifacts/contracts/IWallet.sol/IWallet.json
-        - name: ERC20
-          file: ./abi/IERC20.json
-      eventHandlers:
-        - event: WalletSet(indexed address)
-          handler: handleWalletSet
-        - event: ActionSet(indexed address,bool)
-          handler: handleActionSet
-        - event: Authorized(indexed address,bytes4)
-          handler: handleAuthorized
-        - event: Unauthorized(indexed address,bytes4)
-          handler: handleUnauthorized
-      file: ./src/SmartVault.ts
-  - kind: ethereum/contract
-    name: Action
-    network: {{network}}
-    source:
-      abi: Action
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.5
-      language: wasm/assemblyscript
-      entities:
-        - Action
-      abis:
-        - name: Action
-          file: ./abi/IAction.json
-        - name: SmartVault
-          file: ./node_modules/@mimic-fi/v2-smart-vault/artifacts/contracts/ISmartVault.sol/ISmartVault.json
-      eventHandlers:
-        - event: Executed()
-          handler: handleExecuted
-        - event: Authorized(indexed address,bytes4)
-          handler: handleAuthorized
-        - event: Unauthorized(indexed address,bytes4)
-          handler: handleUnauthorized
-      file: ./src/Action.ts
-  - kind: ethereum/contract
-    name: Wallet
-    network: {{network}}
-    source:
-      abi: Wallet
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.5
-      language: wasm/assemblyscript
-      entities:
-        - SmartVault
-      abis:
-        - name: Wallet
-          file: ./node_modules/@mimic-fi/v2-wallet/artifacts/contracts/IWallet.sol/IWallet.json
         - name: Strategy
           file: ./node_modules/@mimic-fi/v2-strategies/artifacts/contracts/IStrategy.sol/IStrategy.json
         - name: ERC20
@@ -116,23 +64,23 @@ templates:
           handler: handleWrap
         - event: Unwrap(uint256,bytes)
           handler: handleUnwrap
-        - event: Claim(address,address[],uint256[],bytes)
+        - event: Claim(indexed address,address[],uint256[],bytes)
           handler: handleClaim
-        - event: Join(address,uint256,uint256,uint256,bytes)
+        - event: Join(indexed address,uint256,uint256,uint256,bytes)
           handler: handleJoin
-        - event: Exit(address,uint256,uint256,uint256,uint256,bytes)
+        - event: Exit(indexed address,uint256,uint256,uint256,uint256,bytes)
           handler: handleExit
         - event: Swap(indexed uint8,indexed address,indexed address,uint256,uint256,uint256,uint256,bytes)
           handler: handleSwap
-        - event: StrategySet(address,bool)
+        - event: StrategySet(indexed address,bool)
           handler: handleStrategySet
-        - event: PriceOracleSet(address)
+        - event: PriceOracleSet(indexed address)
           handler: handlePriceOracleSet
         - event: PriceFeedSet(indexed address,indexed address,address)
           handler: handlePriceFeedSet
-        - event: SwapConnectorSet(address)
+        - event: SwapConnectorSet(indexed address)
           handler: handleSwapConnectorSet
-        - event: FeeCollectorSet(address)
+        - event: FeeCollectorSet(indexed address)
           handler: handleFeeCollectorSet
         - event: WithdrawFeeSet(uint256,uint256,address,uint256)
           handler: handleWithdrawFeeSet
@@ -144,4 +92,4 @@ templates:
           handler: handleAuthorized
         - event: Unauthorized(indexed address,bytes4)
           handler: handleUnauthorized
-      file: ./src/Wallet.ts
+      file: ./src/SmartVault.ts
