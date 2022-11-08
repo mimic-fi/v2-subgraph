@@ -5,6 +5,9 @@
 <h4 align="center">A DeFi automation platform</h4>
 
 <p align="center">
+  <a href="https://github.com/mimic-fi/v2-subgraph/actions/workflows/deploy.yml">
+    <img src="https://github.com/mimic-fi/v2-subgraph/actions/workflows/deploy.yml/badge.svg" alt="Deploy">
+  </a>
   <a href="https://github.com/mimic-fi/v2-subgraph/actions/workflows/ci.yml">
     <img src="https://github.com/mimic-fi/v2-subgraph/actions/workflows/ci.yml/badge.svg" alt="CI">
   </a>
