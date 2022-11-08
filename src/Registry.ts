@@ -1,8 +1,10 @@
 import { Address, log } from '@graphprotocol/graph-ts'
 
 import { SmartVault as SmartVaultTemplate } from '../types/templates'
-import { Implementation, Instance, Registry, SmartVault } from '../types/schema'
+import { Implementation, Instance, Registry } from '../types/schema'
 import { Registered, Deprecated, Cloned, Authorized, Unauthorized } from '../types/Registry/Registry'
+
+import { loadOrCreateSmartVault } from './SmartVault'
 import { processAuthorizedEvent, processUnauthorizedEvent } from './Permissions'
 
 const SMART_VAULT_NAMESPACE = '0xdd327ba0ba6e7bb0e0099273577340e52e9e071b1b87834b866bafccdc4c14cb'
@@ -47,8 +49,7 @@ export function handleCloned(event: Cloned): void {
   if (implementation.namespace == SMART_VAULT_NAMESPACE) {
     log.warning('New smart vault {}', [event.params.instance.toHexString()])
     SmartVaultTemplate.create(event.params.instance)
-    let smartVault = new SmartVault(event.params.instance.toHexString())
-    smartVault.save()
+    loadOrCreateSmartVault(event.params.instance)
   }
 }
 

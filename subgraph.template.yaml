@@ -20,6 +20,8 @@ dataSources:
       abis:
         - name: Registry
           file: ./node_modules/@mimic-fi/v2-registry/artifacts/contracts/registry/IRegistry.sol/IRegistry.json
+        - name: SmartVault
+          file: ./node_modules/@mimic-fi/v2-smart-vault/artifacts/contracts/ISmartVault.sol/ISmartVault.json
         - name: ERC20
           file: ./abi/IERC20.json
       eventHandlers:
