@@ -509,6 +509,11 @@ export function loadOrCreateSmartVault(address: Address): SmartVault {
 
   if (smartVault === null) {
     smartVault = new SmartVault(id)
+    smartVault.strategies = []
+    smartVault.priceOracle = ZERO_ADDRESS.toHexString()
+    smartVault.swapConnector = ZERO_ADDRESS.toHexString()
+    smartVault.feeCollector = ZERO_ADDRESS.toHexString()
+    smartVault.wrappedNativeToken = loadOrCreateERC20(getWrappedNativeToken(address)).id
     smartVault.save()
   }
 
