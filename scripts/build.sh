@@ -12,8 +12,8 @@ registry_matic=
 block_matic=
 
 # Goerli
-registry_goerli=0x578D1B18433650a2c0CA5aea6456AE0F5aD465dc
-block_goerli=7892424
+registry_goerli=0x5aaE001Ffb7a2982f01D17C0daAe9A1D67b5a2d3
+block_goerli=7923525
 
 # Validate network
 networks=(mainnet matic goerli)

@@ -51,8 +51,6 @@ templates:
       abis:
         - name: SmartVault
           file: ./node_modules/@mimic-fi/v2-smart-vault/artifacts/contracts/ISmartVault.sol/ISmartVault.json
-        - name: Strategy
-          file: ./node_modules/@mimic-fi/v2-strategies/artifacts/contracts/IStrategy.sol/IStrategy.json
         - name: ERC20
           file: ./abi/IERC20.json
       eventHandlers:
@@ -62,15 +60,15 @@ templates:
           handler: handleCollect
         - event: Withdraw(indexed address,indexed address,uint256,uint256,bytes)
           handler: handleWithdraw
-        - event: Wrap(uint256,bytes)
+        - event: Wrap(uint256,uint256,bytes)
           handler: handleWrap
-        - event: Unwrap(uint256,bytes)
+        - event: Unwrap(uint256,uint256,bytes)
           handler: handleUnwrap
         - event: Claim(indexed address,address[],uint256[],bytes)
           handler: handleClaim
-        - event: Join(indexed address,uint256,uint256,uint256,bytes)
+        - event: Join(indexed address,address[],uint256[],address[],uint256[],uint256,uint256,bytes)
           handler: handleJoin
-        - event: Exit(indexed address,uint256,uint256,uint256,uint256,bytes)
+        - event: Exit(indexed address,address[],uint256[],address[],uint256[],uint256,uint256[],uint256,bytes)
           handler: handleExit
         - event: Swap(indexed uint8,indexed address,indexed address,uint256,uint256,uint256,uint256,bytes)
           handler: handleSwap
