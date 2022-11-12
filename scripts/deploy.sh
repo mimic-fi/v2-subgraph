@@ -13,4 +13,4 @@ if [[ -z "${GRAPH_KEY}" ]]; then
 fi
 
 # Deploy subgraph
-graph deploy mimic-fi/v2-goerli --product hosted-service --access-token "$GRAPH_KEY"
+graph deploy mimic-fi/v2-$NETWORK --product hosted-service --access-token "$GRAPH_KEY"
