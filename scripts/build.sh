@@ -4,16 +4,16 @@
 set -o errexit
 
 # Mainnet
-registry_mainnet=
-block_mainnet=
+registry_mainnet=0x53D627B1a2993139b32d5dF209A94498d691f21A
+block_mainnet=15950104
 
 # Polygon
-registry_matic=
+registry_matic=0x53D627B1a2993139b32d5dF209A94498d691f21A
 block_matic=
 
 # Goerli
-registry_goerli=0x5aaE001Ffb7a2982f01D17C0daAe9A1D67b5a2d3
-block_goerli=7923525
+registry_goerli=0x53D627B1a2993139b32d5dF209A94498d691f21A
+block_goerli=7936627
 
 # Validate network
 networks=(mainnet matic goerli)
