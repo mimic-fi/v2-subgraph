@@ -57,6 +57,8 @@ export function handleCall(event: Call): void {
   execution.data = event.params.data.toHexString()
   execution.executedAt = event.block.timestamp
   execution.transaction = event.transaction.hash.toHexString()
+  execution.sender = event.transaction.from.toHexString()
+  execution.target = event.transaction.to
   execution.save()
 }
 
@@ -69,6 +71,8 @@ export function handleCollect(event: Collect): void {
   execution.data = event.params.data.toHexString()
   execution.executedAt = event.block.timestamp
   execution.transaction = event.transaction.hash.toHexString()
+  execution.sender = event.transaction.from.toHexString()
+  execution.target = event.transaction.to
   execution.save()
 
   let tokenOut = loadOrCreateERC20(event.params.token)
@@ -84,6 +88,8 @@ export function handleWithdraw(event: Withdraw): void {
   execution.data = event.params.data.toHexString()
   execution.executedAt = event.block.timestamp
   execution.transaction = event.transaction.hash.toHexString()
+  execution.sender = event.transaction.from.toHexString()
+  execution.target = event.transaction.to
   execution.save()
 
   let tokenIn = loadOrCreateERC20(event.params.token)
@@ -111,6 +117,8 @@ export function handleWrap(event: Wrap): void {
   execution.data = event.params.data.toHexString()
   execution.executedAt = event.block.timestamp
   execution.transaction = event.transaction.hash.toHexString()
+  execution.sender = event.transaction.from.toHexString()
+  execution.target = event.transaction.to
   execution.save()
 
   let tokenIn = loadOrCreateNativeToken()
@@ -129,6 +137,8 @@ export function handleUnwrap(event: Unwrap): void {
   execution.data = event.params.data.toHexString()
   execution.executedAt = event.block.timestamp
   execution.transaction = event.transaction.hash.toHexString()
+  execution.sender = event.transaction.from.toHexString()
+  execution.target = event.transaction.to
   execution.save()
 
   let tokenIn = ERC20.load(smartVault.wrappedNativeToken)!
@@ -150,6 +160,8 @@ export function handleClaim(event: Claim): void {
   execution.data = event.params.data.toHexString()
   execution.executedAt = event.block.timestamp
   execution.transaction = event.transaction.hash.toHexString()
+  execution.sender = event.transaction.from.toHexString()
+  execution.target = event.transaction.to
   execution.save()
 
   for (let i: i32 = 0; i < rewardTokens.length; i++) {
@@ -167,6 +179,8 @@ export function handleJoin(event: Join): void {
   execution.data = event.params.data.toHexString()
   execution.executedAt = event.block.timestamp
   execution.transaction = event.transaction.hash.toHexString()
+  execution.sender = event.transaction.from.toHexString()
+  execution.target = event.transaction.to
   execution.save()
 
   let tokensIn = event.params.tokensIn
@@ -195,6 +209,8 @@ export function handleExit(event: Exit): void {
   execution.data = event.params.data.toHexString()
   execution.executedAt = event.block.timestamp
   execution.transaction = event.transaction.hash.toHexString()
+  execution.sender = event.transaction.from.toHexString()
+  execution.target = event.transaction.to
   execution.save()
 
   let tokensIn = event.params.tokensIn
@@ -236,6 +252,8 @@ export function handleSwap(event: Swap): void {
   execution.data = event.params.data.toHexString()
   execution.executedAt = event.block.timestamp
   execution.transaction = event.transaction.hash.toHexString()
+  execution.sender = event.transaction.from.toHexString()
+  execution.target = event.transaction.to
   execution.save()
 
   let tokenIn = loadOrCreateERC20(event.params.tokenIn)

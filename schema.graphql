@@ -46,6 +46,8 @@ type PrimitiveExecution @entity {
   data: String!
   executedAt: BigInt!
   transaction: String!
+  sender: String!
+  target: Bytes
   fee: FeePaid @derivedFrom(field: "primitiveExecution")
   movements: [Movement!] @derivedFrom(field: "primitiveExecution")
 }
