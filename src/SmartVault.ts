@@ -280,6 +280,7 @@ export function handlePriceFeedSet(event: PriceFeedSet): void {
   let smartVault = loadOrCreateSmartVault(event.address)
   let feedId = smartVault.id + '/feeds/' + event.params.base.toHexString() + '/' + event.params.quote.toHexString()
   let feed = new PriceFeed(feedId)
+  feed.feed = event.params.feed.toHexString()
   feed.base = event.params.base.toHexString()
   feed.quote = event.params.quote.toHexString()
   feed.smartVault = smartVault.id
