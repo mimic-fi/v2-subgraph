@@ -31,6 +31,13 @@
 
 This package contains the subgraph logic mainly used to populate information for the UI.
 
+## Subgraphs 
+
+Currently, Mimic Finance v2 subgraph is deployed to the following networks:
+
+- Mainnet: [mimic-fi/v2-mainnet](https://thegraph.com/hosted-service/subgraph/mimic-fi/v2-mainnet)
+- Goerli: [mimic-fi/v2-goerli](https://thegraph.com/hosted-service/subgraph/mimic-fi/v2-goelri)
+
 ## Setup
 
 To set up this project you'll need [git](https://git-scm.com) and [yarn](https://classic.yarnpkg.com) installed. 
