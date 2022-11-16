@@ -35,6 +35,7 @@ import {
   FeeCollectorSet
 } from '../types/templates/SmartVault/SmartVault'
 
+import { rateInUsd } from './UniswapV2'
 import { loadOrCreateERC20, loadOrCreateNativeToken } from './ERC20'
 import { processAuthorizedEvent, processUnauthorizedEvent } from './Permissions'
 
@@ -106,6 +107,10 @@ export function handleWithdraw(event: Withdraw): void {
     fee.feeCollector = getFeeCollector(event.address)
     fee.save()
   }
+
+  let value = rateInUsd(event.params.token, event.params.withdrawn)
+  smartVault.totalValueManaged = smartVault.totalValueManaged.plus(value)
+  smartVault.save()
 }
 
 export function handleWrap(event: Wrap): void {
@@ -439,6 +444,7 @@ export function loadOrCreateSmartVault(address: Address): SmartVault {
     smartVault.swapConnector = ZERO_ADDRESS.toHexString()
     smartVault.feeCollector = ZERO_ADDRESS.toHexString()
     smartVault.wrappedNativeToken = loadOrCreateERC20(getWrappedNativeToken(address)).id
+    smartVault.totalValueManaged = BigInt.zero()
     smartVault.save()
   }
 

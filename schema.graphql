@@ -30,6 +30,7 @@ type SmartVault implements Authorizer @entity {
   swapConnector: String!
   strategies: [String!]!
   feeCollector: String!
+  totalValueManaged: BigInt!
   wrappedNativeToken: ERC20!
   swapFee: FeeConfig @derivedFrom(field: "smartVault")
   withdrawFee: FeeConfig @derivedFrom(field: "smartVault")
