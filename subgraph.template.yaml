@@ -23,7 +23,7 @@ dataSources:
         - name: SmartVault
           file: ./node_modules/@mimic-fi/v2-smart-vault/artifacts/contracts/ISmartVault.sol/ISmartVault.json
         - name: ERC20
-          file: ./abi/IERC20.json
+          file: ./node_modules/@uniswap/v2-core/build/IERC20.json
       eventHandlers:
         - event: Registered(indexed bytes32,indexed address,bool)
           handler: handleRegistered
@@ -52,7 +52,11 @@ templates:
         - name: SmartVault
           file: ./node_modules/@mimic-fi/v2-smart-vault/artifacts/contracts/ISmartVault.sol/ISmartVault.json
         - name: ERC20
-          file: ./abi/IERC20.json
+          file: ./node_modules/@uniswap/v2-core/build/IERC20.json
+        - name: UniswapPair
+          file: ./node_modules/@uniswap/v2-core/build/IUniswapV2Pair.json
+        - name: UniswapFactory
+          file: ./node_modules/@uniswap/v2-core/build/IUniswapV2Factory.json
       eventHandlers:
         - event: Call(indexed address,bytes,uint256,bytes,bytes)
           handler: handleCall
