@@ -6,9 +6,11 @@
   "scripts": {
     "lint": "eslint . --ext .ts",
     "build:goerli": "NETWORK=goerli ./scripts/build.sh",
+    "build:mumbai": "NETWORK=mumbai ./scripts/build.sh",
     "build:matic": "NETWORK=matic ./scripts/build.sh",
     "build:mainnet": "NETWORK=mainnet ./scripts/build.sh",
     "deploy:goerli": "NETWORK=goerli ./scripts/deploy.sh",
+    "deploy:mumbai": "NETWORK=mumbai ./scripts/deploy.sh",
     "deploy:matic": "NETWORK=matic ./scripts/deploy.sh",
     "deploy:mainnet": "NETWORK=mainnet ./scripts/deploy.sh"
   },

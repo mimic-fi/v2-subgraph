@@ -15,10 +15,14 @@ block_matic=
 registry_goerli=0x53D627B1a2993139b32d5dF209A94498d691f21A
 block_goerli=7936627
 
+# Mumbai
+registry_mumbai=0x53D627B1a2993139b32d5dF209A94498d691f21A
+block_mumbai=29929062
+
 # Validate network
-networks=(mainnet matic goerli)
+networks=(mainnet matic goerli mumbai)
 if [[ -z $NETWORK || ! " ${networks[@]} " =~ " ${NETWORK} " ]]; then
-  echo 'Please make sure the network provided is either mainnet, matic, or goerli.'
+  echo 'Please make sure the network provided is either mainnet, matic, mumbai or goerli.'
   exit 1
 fi
 
