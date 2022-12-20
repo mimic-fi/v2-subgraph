@@ -13,8 +13,8 @@
     "deploy:mainnet": "NETWORK=mainnet ./scripts/deploy.sh"
   },
   "dependencies": {
-    "@mimic-fi/v2-smart-vault": "0.0.11",
-    "@mimic-fi/v2-strategies": "0.0.7",
+    "@mimic-fi/v2-smart-vault": "0.0.14",
+    "@mimic-fi/v2-strategies": "0.0.9",
     "@mimic-fi/v2-registry": "0.0.7",
     "@uniswap/v2-core": "^1.0.1"
   },

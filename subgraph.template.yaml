@@ -76,6 +76,8 @@ templates:
           handler: handleExit
         - event: Swap(indexed uint8,indexed address,indexed address,uint256,uint256,uint256,uint256,bytes)
           handler: handleSwap
+        - event: Bridge(indexed uint8,indexed uint256,indexed address,uint256,uint256,uint256,address,bytes)
+          handler: handleBridge
         - event: StrategySet(indexed address,bool)
           handler: handleStrategySet
         - event: PriceOracleSet(indexed address)
@@ -84,6 +86,8 @@ templates:
           handler: handlePriceFeedSet
         - event: SwapConnectorSet(indexed address)
           handler: handleSwapConnectorSet
+        - event: BridgeConnectorSet(indexed address)
+          handler: handleBridgeConnectorSet
         - event: FeeCollectorSet(indexed address)
           handler: handleFeeCollectorSet
         - event: WithdrawFeeSet(uint256,uint256,address,uint256)
@@ -92,6 +96,8 @@ templates:
           handler: handlePerformanceFeeSet
         - event: SwapFeeSet(uint256,uint256,address,uint256)
           handler: handleSwapFeeSet
+        - event: BridgeFeeSet(uint256,uint256,address,uint256)
+          handler: handleBridgeFeeSet
         - event: Authorized(indexed address,bytes4)
           handler: handleAuthorized
         - event: Unauthorized(indexed address,bytes4)

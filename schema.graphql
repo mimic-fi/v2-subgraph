@@ -28,6 +28,7 @@ type SmartVault implements Authorizer @entity {
   priceFeeds: [PriceFeed!] @derivedFrom(field: "smartVault")
   priceOracle: String!
   swapConnector: String!
+  bridgeConnector: String!
   strategies: [String!]!
   feeCollector: String!
   totalValueManaged: BigInt!

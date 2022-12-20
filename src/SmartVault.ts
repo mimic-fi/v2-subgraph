@@ -24,12 +24,15 @@ import {
   Exit,
   Swap,
   SwapFeeSet,
+  Bridge,
+  BridgeFeeSet,
   WithdrawFeeSet,
   PerformanceFeeSet,
   PriceOracleSet,
   PriceFeedSet,
   StrategySet,
   SwapConnectorSet,
+  BridgeConnectorSet,
   Authorized,
   Unauthorized,
   FeeCollectorSet
@@ -280,6 +283,35 @@ export function handleSwap(event: Swap): void {
   }
 }
 
+export function handleBridge(event: Bridge): void {
+  let smartVault = loadOrCreateSmartVault(event.address)
+  let executionId = smartVault.id + '/executions/' + getTransactionId(event)
+  let execution = new PrimitiveExecution(executionId)
+  execution.type = 'Bridge'
+  execution.smartVault = smartVault.id
+  execution.data = event.params.data.toHexString()
+  execution.executedAt = event.block.timestamp
+  execution.transaction = event.transaction.hash.toHexString()
+  execution.sender = event.transaction.from.toHexString()
+  execution.target = event.transaction.to
+  execution.save()
+
+  let token = loadOrCreateERC20(event.params.token)
+  createMovementIn(event, 1, execution, token, event.params.amountIn)
+
+  if (!event.params.fee.isZero()) {
+    let feeId = smartVault.id + '/paid-fees/' + getTransactionId(event)
+    let fee = new FeePaid(feeId)
+    fee.smartVault = smartVault.id
+    fee.primitiveExecution = execution.id
+    fee.token = token.id
+    fee.amount = event.params.fee
+    fee.pct = getBridgeFeePct(event.address)
+    fee.feeCollector = getFeeCollector(event.address)
+    fee.save()
+  }
+}
+
 export function handleStrategySet(event: StrategySet): void {
   let smartVault = loadOrCreateSmartVault(event.address)
   let strategies = smartVault.strategies
@@ -313,6 +345,12 @@ export function handlePriceFeedSet(event: PriceFeedSet): void {
 export function handleSwapConnectorSet(event: SwapConnectorSet): void {
   let smartVault = loadOrCreateSmartVault(event.address)
   smartVault.swapConnector = event.params.swapConnector.toHexString()
+  smartVault.save()
+}
+
+export function handleBridgeConnectorSet(event: BridgeConnectorSet): void {
+  let smartVault = loadOrCreateSmartVault(event.address)
+  smartVault.bridgeConnector = event.params.bridgeConnector.toHexString()
   smartVault.save()
 }
 
@@ -371,6 +409,23 @@ export function handleSwapFeeSet(event: SwapFeeSet): void {
   swapFee.token = loadOrCreateERC20(event.params.token).id
   swapFee.period = event.params.period
   swapFee.save()
+}
+
+export function handleBridgeFeeSet(event: BridgeFeeSet): void {
+  let smartVault = loadOrCreateSmartVault(event.address)
+  let bridgeFeeId = smartVault.id + '/bridge-fee'
+  let bridgeFee = FeeConfig.load(bridgeFeeId)
+
+  if (bridgeFee === null) {
+    bridgeFee = new FeeConfig(bridgeFeeId)
+    bridgeFee.smartVault = smartVault.id
+  }
+
+  bridgeFee.pct = event.params.pct
+  bridgeFee.cap = event.params.cap
+  bridgeFee.token = loadOrCreateERC20(event.params.token).id
+  bridgeFee.period = event.params.period
+  bridgeFee.save()
 }
 
 export function getWrappedNativeToken(address: Address): Address {
@@ -433,6 +488,18 @@ function getSwapFeePct(address: Address): BigInt {
   return BigInt.zero()
 }
 
+function getBridgeFeePct(address: Address): BigInt {
+  let wallet = SmartVaultContract.bind(address)
+  let bridgeFeeCall = wallet.try_bridgeFee()
+
+  if (!bridgeFeeCall.reverted) {
+    return bridgeFeeCall.value.value0
+  }
+
+  log.warning('bridgeFee() call reverted for {}', [address.toHexString()])
+  return BigInt.zero()
+}
+
 export function loadOrCreateSmartVault(address: Address): SmartVault {
   let id = address.toHexString()
   let smartVault = SmartVault.load(id)
@@ -442,6 +509,7 @@ export function loadOrCreateSmartVault(address: Address): SmartVault {
     smartVault.strategies = []
     smartVault.priceOracle = ZERO_ADDRESS.toHexString()
     smartVault.swapConnector = ZERO_ADDRESS.toHexString()
+    smartVault.bridgeConnector = ZERO_ADDRESS.toHexString()
     smartVault.feeCollector = ZERO_ADDRESS.toHexString()
     smartVault.wrappedNativeToken = loadOrCreateERC20(getWrappedNativeToken(address)).id
     smartVault.totalValueManaged = BigInt.zero()

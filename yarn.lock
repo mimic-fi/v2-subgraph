@@ -477,6 +477,15 @@
     tweetnacl "^1.0.3"
     tweetnacl-util "^0.15.1"
 
+"@mimic-fi/v2-bridge-connector@0.0.3":
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/@mimic-fi/v2-bridge-connector/-/v2-bridge-connector-0.0.3.tgz#e6ba92958986a420ffdb5563e2197268c34b3102"
+  integrity sha512-Pngg3lbSUy6w+UVovyHErN0tWhur/EqJuQeSanlMrCJ7xEeG2mLLuw0eRIKfOXU/lWYI0lFm8d+EU7F6/yBOzQ==
+  dependencies:
+    "@mimic-fi/v2-helpers" "0.0.13"
+    "@mimic-fi/v2-registry" "0.0.7"
+    "@openzeppelin/contracts" "4.7.0"
+
 "@mimic-fi/v2-helpers@0.0.10":
   version "0.0.10"
   resolved "https://registry.yarnpkg.com/@mimic-fi/v2-helpers/-/v2-helpers-0.0.10.tgz#bf1aefe40abbc9ee240fb452e3fa6310a67200c8"
@@ -491,24 +500,23 @@
     ethers "^5.0.8"
     hardhat "^2.4.1"
 
-"@mimic-fi/v2-helpers@0.0.11":
-  version "0.0.11"
-  resolved "https://registry.yarnpkg.com/@mimic-fi/v2-helpers/-/v2-helpers-0.0.11.tgz#b51f5d2ddc1d5a239b9142157bf2bb26eea44ba5"
-  integrity sha512-hxpQzeInVVg44Uqdgh9FC45RHwGd7xjYGEMuEl7KJgPM8WGNVGXwYqkzSeb1GcUxpvcBqjPz5E7LDBj+ZEtt0A==
+"@mimic-fi/v2-helpers@0.0.13":
+  version "0.0.13"
+  resolved "https://registry.yarnpkg.com/@mimic-fi/v2-helpers/-/v2-helpers-0.0.13.tgz#88d79018fc7f31e8b78b2f3430b1880d10d47ed6"
+  integrity sha512-cYA5MAmvCKMYKe+5GgAAmzhuGMh8OLh9mnBWfq/LwxAC/MyANrRac4U//DFhX5e5UZ7G0SrE9vWRpkUESKbUfw==
   dependencies:
-    "@nomiclabs/hardhat-ethers" "^2.0.2"
-    "@nomiclabs/hardhat-waffle" "^2.0.1"
+    "@nomiclabs/hardhat-ethers" "^2.2.1"
+    "@nomiclabs/hardhat-waffle" "^2.0.3"
     "@types/chai" "^4.2.18"
     "@types/mocha" "^8.2.2"
     chai "^4.2.0"
     decimal.js "^10.3.1"
-    ethers "^5.0.8"
-    hardhat "^2.4.1"
+    hardhat "^2.12.3"
 
-"@mimic-fi/v2-price-oracle@0.0.7":
-  version "0.0.7"
-  resolved "https://registry.yarnpkg.com/@mimic-fi/v2-price-oracle/-/v2-price-oracle-0.0.7.tgz#1f79a75e83caba115750793f8a212c3798c17265"
-  integrity sha512-WoXjATZiCLQHvXeyZEi5JQE4+E6/fL2PevYTjSiix/r9Ys5fN8hoH/R7AH5fQWmAHJpQBk8FkLA670qUQ59a3g==
+"@mimic-fi/v2-price-oracle@0.0.8":
+  version "0.0.8"
+  resolved "https://registry.yarnpkg.com/@mimic-fi/v2-price-oracle/-/v2-price-oracle-0.0.8.tgz#4cb479865e46bf2daf12c4415cbbd1218a4a1a64"
+  integrity sha512-FOdMhbmXD1/e/3STQt7i5/0f+mxfFEGIpuvLQzn8HjEjR5HdCltJKw1csftuucydhhIQJEvQhhf3fde36cgzMA==
   dependencies:
     "@chainlink/contracts" "^0.2.1"
     "@mimic-fi/v2-helpers" "0.0.10"
@@ -522,33 +530,34 @@
   dependencies:
     "@mimic-fi/v2-helpers" "0.0.10"
 
-"@mimic-fi/v2-smart-vault@0.0.11":
-  version "0.0.11"
-  resolved "https://registry.yarnpkg.com/@mimic-fi/v2-smart-vault/-/v2-smart-vault-0.0.11.tgz#2f0ad268fc8dc1af991220b7d9655f6099bf8245"
-  integrity sha512-P/zt5kRSApuh+4SVDLwu0c8Qt/TkTm9jwG246ULr0xQc5//7dRahxPvlQ1dPRcLlK9DG70jf2scA4gA7CSmnUw==
+"@mimic-fi/v2-smart-vault@0.0.14":
+  version "0.0.14"
+  resolved "https://registry.yarnpkg.com/@mimic-fi/v2-smart-vault/-/v2-smart-vault-0.0.14.tgz#7967940b915b21b81635e5cfc704a7a519fde8e0"
+  integrity sha512-BFFn9z+3JcXIuTYvIwECT7KqWopyvpR+zZRx23iWMiupjZ/8rVacfUG3d15dXpfSUtQOk8qybyJc/oeyGOgs/Q==
   dependencies:
-    "@mimic-fi/v2-helpers" "0.0.11"
-    "@mimic-fi/v2-price-oracle" "0.0.7"
+    "@mimic-fi/v2-bridge-connector" "0.0.3"
+    "@mimic-fi/v2-helpers" "0.0.13"
+    "@mimic-fi/v2-price-oracle" "0.0.8"
     "@mimic-fi/v2-registry" "0.0.7"
-    "@mimic-fi/v2-strategies" "0.0.7"
-    "@mimic-fi/v2-swap-connector" "0.0.15"
+    "@mimic-fi/v2-strategies" "0.0.9"
+    "@mimic-fi/v2-swap-connector" "0.0.18"
     "@openzeppelin/contracts" "4.7.0"
 
-"@mimic-fi/v2-strategies@0.0.7":
-  version "0.0.7"
-  resolved "https://registry.yarnpkg.com/@mimic-fi/v2-strategies/-/v2-strategies-0.0.7.tgz#948f045a755fe308a528d944e49b224686063356"
-  integrity sha512-at7fSgOHKz8wsMTZbCPgcqQrnwH7C03Ihp7xmc5tBvpSZeOoqMRS68rKZGHykZAoKdUBdmeQkvxzyf2rPLBglA==
+"@mimic-fi/v2-strategies@0.0.9":
+  version "0.0.9"
+  resolved "https://registry.yarnpkg.com/@mimic-fi/v2-strategies/-/v2-strategies-0.0.9.tgz#7230eeb0b5e2087f10f95964aed66a5f2a5f0879"
+  integrity sha512-Vvq1YIjq1DfoYLax3EOKpmJvNiyK+U3tCoyDv6Ync4zrtmebj3jcOxkOlFg8MVkZkNoMhUPcwi6qg+3RVH/FMA==
   dependencies:
-    "@mimic-fi/v2-helpers" "0.0.11"
+    "@mimic-fi/v2-helpers" "0.0.13"
     "@mimic-fi/v2-registry" "0.0.7"
     "@openzeppelin/contracts" "4.7.0"
 
-"@mimic-fi/v2-swap-connector@0.0.15":
-  version "0.0.15"
-  resolved "https://registry.yarnpkg.com/@mimic-fi/v2-swap-connector/-/v2-swap-connector-0.0.15.tgz#62b9e26343c5fcaee12d7b2f15807a10e57ca3ef"
-  integrity sha512-2PdelPvNhGj2XCaz1Tq+tH2mp2DSbEFkDBuIFmKd6xaAUQlTqgHH5f/laDzcyJ2kpor8RHRyGsDCjwwKhxeNRQ==
+"@mimic-fi/v2-swap-connector@0.0.18":
+  version "0.0.18"
+  resolved "https://registry.yarnpkg.com/@mimic-fi/v2-swap-connector/-/v2-swap-connector-0.0.18.tgz#b20b8567f2ec9f2f0c060b9ae2e928d27e055e74"
+  integrity sha512-aSdlds8owyJpIaTVtrbPOX2rnUcBreDtrRC/7e85f8IEOrgX9RNn09L0AuMtWhDR2m4es3HqB0eq5B5D/KMt4g==
   dependencies:
-    "@mimic-fi/v2-helpers" "0.0.11"
+    "@mimic-fi/v2-helpers" "0.0.13"
     "@mimic-fi/v2-registry" "0.0.7"
     "@openzeppelin/contracts" "4.7.0"
     "@uniswap/v2-core" "^1.0.1"
@@ -795,7 +804,12 @@
   resolved "https://registry.yarnpkg.com/@nomiclabs/hardhat-ethers/-/hardhat-ethers-2.2.0.tgz#f55ace2752d0effcf583e754960e9fa89fbe12cd"
   integrity sha512-kKCW7xawuD/lw69Yr1yqUUrF0IKmnLNGf+pTVbJ/ctHaRcPrwKI0EPkO1RNXBHlOOZkv6v4DK2PPvq0lL2ykig==
 
-"@nomiclabs/hardhat-waffle@^2.0.1":
+"@nomiclabs/hardhat-ethers@^2.2.1":
+  version "2.2.1"
+  resolved "https://registry.yarnpkg.com/@nomiclabs/hardhat-ethers/-/hardhat-ethers-2.2.1.tgz#8057b43566a0e41abeb8142064a3c0d3f23dca86"
+  integrity sha512-RHWYwnxryWR8hzRmU4Jm/q4gzvXpetUOJ4OPlwH2YARcDB+j79+yAYCwO0lN1SUOb4++oOTJEe6AWLEc42LIvg==
+
+"@nomiclabs/hardhat-waffle@^2.0.1", "@nomiclabs/hardhat-waffle@^2.0.3":
   version "2.0.3"
   resolved "https://registry.yarnpkg.com/@nomiclabs/hardhat-waffle/-/hardhat-waffle-2.0.3.tgz#9c538a09c5ed89f68f5fd2dc3f78f16ed1d6e0b1"
   integrity sha512-049PHSnI1CZq6+XTbrMbMv5NaL7cednTfPenx02k3cEh8wBMLa6ys++dBETJa6JjfwgA9nBhhHQ173LJv6k2Pg==
@@ -2965,6 +2979,62 @@ har-validator@~5.1.3:
   dependencies:
     ajv "^6.12.3"
     har-schema "^2.0.0"
+
+hardhat@^2.12.3:
+  version "2.12.4"
+  resolved "https://registry.yarnpkg.com/hardhat/-/hardhat-2.12.4.tgz#e539ba58bee9ba1a1ced823bfdcec0b3c5a3e70f"
+  integrity sha512-rc9S2U/4M+77LxW1Kg7oqMMmjl81tzn5rNFARhbXKUA1am/nhfMJEujOjuKvt+ZGMiZ11PYSe8gyIpB/aRNDgw==
+  dependencies:
+    "@ethersproject/abi" "^5.1.2"
+    "@metamask/eth-sig-util" "^4.0.0"
+    "@nomicfoundation/ethereumjs-block" "^4.0.0"
+    "@nomicfoundation/ethereumjs-blockchain" "^6.0.0"
+    "@nomicfoundation/ethereumjs-common" "^3.0.0"
+    "@nomicfoundation/ethereumjs-evm" "^1.0.0"
+    "@nomicfoundation/ethereumjs-rlp" "^4.0.0"
+    "@nomicfoundation/ethereumjs-statemanager" "^1.0.0"
+    "@nomicfoundation/ethereumjs-trie" "^5.0.0"
+    "@nomicfoundation/ethereumjs-tx" "^4.0.0"
+    "@nomicfoundation/ethereumjs-util" "^8.0.0"
+    "@nomicfoundation/ethereumjs-vm" "^6.0.0"
+    "@nomicfoundation/solidity-analyzer" "^0.1.0"
+    "@sentry/node" "^5.18.1"
+    "@types/bn.js" "^5.1.0"
+    "@types/lru-cache" "^5.1.0"
+    abort-controller "^3.0.0"
+    adm-zip "^0.4.16"
+    aggregate-error "^3.0.0"
+    ansi-escapes "^4.3.0"
+    chalk "^2.4.2"
+    chokidar "^3.4.0"
+    ci-info "^2.0.0"
+    debug "^4.1.1"
+    enquirer "^2.3.0"
+    env-paths "^2.2.0"
+    ethereum-cryptography "^1.0.3"
+    ethereumjs-abi "^0.6.8"
+    find-up "^2.1.0"
+    fp-ts "1.19.3"
+    fs-extra "^7.0.1"
+    glob "7.2.0"
+    immutable "^4.0.0-rc.12"
+    io-ts "1.10.4"
+    keccak "^3.0.2"
+    lodash "^4.17.11"
+    mnemonist "^0.38.0"
+    mocha "^10.0.0"
+    p-map "^4.0.0"
+    qs "^6.7.0"
+    raw-body "^2.4.1"
+    resolve "1.17.0"
+    semver "^6.3.0"
+    solc "0.7.3"
+    source-map-support "^0.5.13"
+    stacktrace-parser "^0.1.10"
+    tsort "0.0.1"
+    undici "^5.4.0"
+    uuid "^8.3.2"
+    ws "^7.4.6"
 
 hardhat@^2.4.1:
   version "2.12.2"
