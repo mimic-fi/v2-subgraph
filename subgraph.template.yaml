@@ -5,6 +5,30 @@ schema:
   file: ./schema.graphql
 dataSources:
   - kind: ethereum/contract
+    name: SmartVaultsFactory
+    network: {{network}}
+    source:
+      address: '{{smartVaultsFactoryAddress}}'
+      abi: SmartVaultsFactory
+      startBlock: {{blockNumber}}
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      entities:
+        - SmartVaultsFactory
+      abis:
+        - name: SmartVaultsFactory
+          file: ./node_modules/@mimic-fi/v2-smart-vault/artifacts/contracts/ISmartVaultsFactory.sol/ISmartVaultsFactory.json
+        - name: SmartVault
+          file: ./node_modules/@mimic-fi/v2-smart-vault/artifacts/contracts/ISmartVault.sol/ISmartVault.json
+        - name: ERC20
+          file: ./node_modules/@uniswap/v2-core/build/IERC20.json
+      eventHandlers:
+        - event: Created(indexed address,indexed address,bytes)
+          handler: handleCreated
+      file: ./src/SmartVaultsFactory.ts
+  - kind: ethereum/contract
     name: Registry
     network: {{network}}
     source:
@@ -19,22 +43,14 @@ dataSources:
         - Registry
       abis:
         - name: Registry
-          file: ./node_modules/@mimic-fi/v2-registry/artifacts/contracts/registry/IRegistry.sol/IRegistry.json
+          file: ./abis/IRegistry_0.0.x.json
         - name: SmartVault
           file: ./node_modules/@mimic-fi/v2-smart-vault/artifacts/contracts/ISmartVault.sol/ISmartVault.json
         - name: ERC20
           file: ./node_modules/@uniswap/v2-core/build/IERC20.json
       eventHandlers:
-        - event: Registered(indexed bytes32,indexed address,bool)
-          handler: handleRegistered
-        - event: Deprecated(indexed bytes32,indexed address)
-          handler: handleDeprecated
         - event: Cloned(indexed bytes32,indexed address,address,bytes)
           handler: handleCloned
-        - event: Authorized(indexed address,bytes4)
-          handler: handleAuthorized
-        - event: Unauthorized(indexed address,bytes4)
-          handler: handleUnauthorized
       file: ./src/Registry.ts
 templates:
   - kind: ethereum/contract
