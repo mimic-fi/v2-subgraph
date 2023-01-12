@@ -22,6 +22,10 @@ jobs:
         env:
           GRAPH_KEY: ${{ secrets.GRAPH_KEY }}
         run: yarn deploy:goerli
+      - name: Deploy Mumbai
+        env:
+          GRAPH_KEY: ${{ secrets.GRAPH_KEY }}
+        run: yarn deploy:mumbai
       - name: Deploy Mainnet
         env:
           GRAPH_KEY: ${{ secrets.GRAPH_KEY }}
