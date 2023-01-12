@@ -15,6 +15,8 @@ type SmartVault implements Authorizer @entity {
   paidFees: [FeePaid!] @derivedFrom(field: "smartVault")
   primitiveExecutions: [PrimitiveExecution!] @derivedFrom(field: "smartVault")
   permissions: [Permission!] @derivedFrom(field: "target")
+  totalFeesUsd: BigInt!
+  totalGasRefundsUsd: BigInt!
 }
 
 type PrimitiveExecution @entity {
@@ -113,4 +115,10 @@ type Permission @entity {
 type Grantee @entity {
   id: ID!
   permissions: [Permission!]!
+}
+
+type Stats @entity {
+  id: ID!
+  totalFeesUsd: BigInt!
+  totalGasRefundsUsd: BigInt!
 }

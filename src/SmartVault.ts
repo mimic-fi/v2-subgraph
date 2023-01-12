@@ -5,6 +5,7 @@ import { SmartVault as SmartVaultContract } from '../types/templates/SmartVault/
 import {
   Balance,
   ERC20,
+  Stats,
   FeeConfig,
   FeePaid,
   PriceFeed,
@@ -42,6 +43,7 @@ import { rateInUsd } from './UniswapV2'
 import { loadOrCreateERC20, loadOrCreateNativeToken } from './ERC20'
 import { processAuthorizedEvent, processUnauthorizedEvent } from './Permissions'
 
+const REDEEM_GAS_NOTE = '0x52454c41594552'
 const ZERO_ADDRESS = Address.fromString('0x0000000000000000000000000000000000000000')
 
 export function handleAuthorized(event: Authorized): void {
@@ -111,9 +113,16 @@ export function handleWithdraw(event: Withdraw): void {
     fee.save()
   }
 
-  let value = rateInUsd(event.params.token, event.params.withdrawn)
-  smartVault.totalValueManaged = smartVault.totalValueManaged.plus(value)
+  let feeUsd = rateInUsd(event.params.token, event.params.fee)
+  let amountUsd = rateInUsd(event.params.token, event.params.withdrawn)
+  let gasRefundUsd = event.params.data.toHexString() == REDEEM_GAS_NOTE ? amountUsd : BigInt.zero()
+
+  smartVault.totalFeesUsd = smartVault.totalFeesUsd.plus(feeUsd)
+  smartVault.totalValueManaged = smartVault.totalValueManaged.plus(amountUsd)
+  smartVault.totalGasRefundsUsd = smartVault.totalGasRefundsUsd.plus(amountUsd)
   smartVault.save()
+
+  trackGlobalStats(feeUsd, gasRefundUsd)
 }
 
 export function handleWrap(event: Wrap): void {
@@ -513,6 +522,8 @@ export function loadOrCreateSmartVault(address: Address): SmartVault {
     smartVault.feeCollector = ZERO_ADDRESS.toHexString()
     smartVault.wrappedNativeToken = loadOrCreateERC20(getWrappedNativeToken(address)).id
     smartVault.totalValueManaged = BigInt.zero()
+    smartVault.totalFeesUsd = BigInt.zero()
+    smartVault.totalGasRefundsUsd = BigInt.zero()
     smartVault.save()
   }
 
@@ -581,6 +592,21 @@ function createMovement(
   movement.amount = amount
   movement.primitiveExecution = execution.id
   movement.save()
+}
+
+function trackGlobalStats(feeUsd: BigInt, gasRefundUsd: BigInt): void {
+  let stats = Stats.load('MIMIC_STATS')
+
+  if (stats == null) {
+    stats = new Stats('MIMIC_STATS')
+    stats.totalFeesUsd = BigInt.zero()
+    stats.totalGasRefundsUsd = BigInt.zero()
+    stats.save()
+  }
+
+  stats.totalFeesUsd = stats.totalFeesUsd.plus(feeUsd)
+  stats.totalGasRefundsUsd = stats.totalGasRefundsUsd.plus(gasRefundUsd)
+  stats.save()
 }
 
 function getTransactionId(event: ethereum.Event): string {
