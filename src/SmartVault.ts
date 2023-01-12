@@ -5,13 +5,14 @@ import { SmartVault as SmartVaultContract } from '../types/templates/SmartVault/
 import {
   Balance,
   ERC20,
-  Stats,
   FeeConfig,
   FeePaid,
   PriceFeed,
   PrimitiveExecution,
   Movement,
-  SmartVault
+  SmartVault,
+  Stats,
+  TransactionCost
 } from '../types/schema'
 
 import {
@@ -39,7 +40,7 @@ import {
   FeeCollectorSet
 } from '../types/templates/SmartVault/SmartVault'
 
-import { rateInUsd } from './UniswapV2'
+import { rateInUsd, WETH } from './UniswapV2'
 import { loadOrCreateERC20, loadOrCreateNativeToken } from './ERC20'
 import { processAuthorizedEvent, processUnauthorizedEvent } from './Permissions'
 
@@ -66,6 +67,8 @@ export function handleCall(event: Call): void {
   execution.sender = event.transaction.from.toHexString()
   execution.target = event.transaction.to
   execution.save()
+
+  trackTransactionCost(event, smartVault, false)
 }
 
 export function handleCollect(event: Collect): void {
@@ -83,6 +86,8 @@ export function handleCollect(event: Collect): void {
 
   let tokenOut = loadOrCreateERC20(event.params.token)
   createMovementOut(event, 1, execution, tokenOut, event.params.collected)
+
+  trackTransactionCost(event, smartVault, false)
 }
 
 export function handleWithdraw(event: Withdraw): void {
@@ -113,16 +118,22 @@ export function handleWithdraw(event: Withdraw): void {
     fee.save()
   }
 
-  let feeUsd = rateInUsd(event.params.token, event.params.fee)
   let amountUsd = rateInUsd(event.params.token, event.params.withdrawn)
-  let gasRefundUsd = event.params.data.toHexString() == REDEEM_GAS_NOTE ? amountUsd : BigInt.zero()
-
-  smartVault.totalFeesUsd = smartVault.totalFeesUsd.plus(feeUsd)
   smartVault.totalValueManaged = smartVault.totalValueManaged.plus(amountUsd)
-  smartVault.totalGasRefundsUsd = smartVault.totalGasRefundsUsd.plus(amountUsd)
+
+  let feeUsd = rateInUsd(event.params.token, event.params.fee)
+  smartVault.totalFeesUsd = smartVault.totalFeesUsd.plus(feeUsd)
+
+  let isRelayedTx = event.params.data.toHexString() == REDEEM_GAS_NOTE
+  let gasRefundUsd = isRelayedTx ? amountUsd : BigInt.zero()
+  let transactionCost = trackTransactionCost(event, smartVault, isRelayedTx)
+  let relayedCostUsd = isRelayedTx ? transactionCost.costUsd : BigInt.zero()
+
+  smartVault.totalGasRefundsUsd = smartVault.totalGasRefundsUsd.plus(gasRefundUsd)
+  smartVault.totalRelayedCostUsd = smartVault.totalRelayedCostUsd.plus(relayedCostUsd)
   smartVault.save()
 
-  trackGlobalStats(feeUsd, gasRefundUsd)
+  trackGlobalStats(feeUsd, gasRefundUsd, relayedCostUsd)
 }
 
 export function handleWrap(event: Wrap): void {
@@ -143,6 +154,8 @@ export function handleWrap(event: Wrap): void {
 
   let tokenOut = ERC20.load(smartVault.wrappedNativeToken)!
   createMovementOut(event, 2, execution, tokenOut, event.params.wrapped)
+
+  trackTransactionCost(event, smartVault, false)
 }
 
 export function handleUnwrap(event: Unwrap): void {
@@ -163,6 +176,8 @@ export function handleUnwrap(event: Unwrap): void {
 
   let tokenOut = loadOrCreateNativeToken()
   createMovementOut(event, 2, execution, tokenOut, event.params.unwrapped)
+
+  trackTransactionCost(event, smartVault, false)
 }
 
 export function handleClaim(event: Claim): void {
@@ -185,6 +200,8 @@ export function handleClaim(event: Claim): void {
     let tokenOut = loadOrCreateERC20(rewardTokens[i])
     createMovementOut(event, i, execution, tokenOut, rewardAmounts[i])
   }
+
+  trackTransactionCost(event, smartVault, false)
 }
 
 export function handleJoin(event: Join): void {
@@ -215,6 +232,8 @@ export function handleJoin(event: Join): void {
     let tokenOut = loadOrCreateERC20(tokensOut[i])
     createMovementOut(event, i, execution, tokenOut, amountOut)
   }
+
+  trackTransactionCost(event, smartVault, false)
 }
 
 export function handleExit(event: Exit): void {
@@ -257,7 +276,15 @@ export function handleExit(event: Exit): void {
       fee.feeCollector = getFeeCollector(event.address)
       fee.save()
     }
+
+    let feeUsd = rateInUsd(tokensOut[i], fees[i])
+    smartVault.totalFeesUsd = smartVault.totalFeesUsd.plus(feeUsd)
+    smartVault.save()
+
+    trackGlobalFees(feeUsd)
   }
+
+  trackTransactionCost(event, smartVault, false)
 }
 
 export function handleSwap(event: Swap): void {
@@ -290,6 +317,13 @@ export function handleSwap(event: Swap): void {
     fee.feeCollector = getFeeCollector(event.address)
     fee.save()
   }
+
+  let feeUsd = rateInUsd(event.params.tokenOut, event.params.fee)
+  smartVault.totalFeesUsd = smartVault.totalFeesUsd.plus(feeUsd)
+  smartVault.save()
+
+  trackGlobalFees(feeUsd)
+  trackTransactionCost(event, smartVault, false)
 }
 
 export function handleBridge(event: Bridge): void {
@@ -319,6 +353,13 @@ export function handleBridge(event: Bridge): void {
     fee.feeCollector = getFeeCollector(event.address)
     fee.save()
   }
+
+  let feeUsd = rateInUsd(event.params.token, event.params.fee)
+  smartVault.totalFeesUsd = smartVault.totalFeesUsd.plus(feeUsd)
+  smartVault.save()
+
+  trackGlobalFees(feeUsd)
+  trackTransactionCost(event, smartVault, false)
 }
 
 export function handleStrategySet(event: StrategySet): void {
@@ -524,6 +565,7 @@ export function loadOrCreateSmartVault(address: Address): SmartVault {
     smartVault.totalValueManaged = BigInt.zero()
     smartVault.totalFeesUsd = BigInt.zero()
     smartVault.totalGasRefundsUsd = BigInt.zero()
+    smartVault.totalRelayedCostUsd = BigInt.zero()
     smartVault.save()
   }
 
@@ -594,18 +636,47 @@ function createMovement(
   movement.save()
 }
 
-function trackGlobalStats(feeUsd: BigInt, gasRefundUsd: BigInt): void {
+function trackTransactionCost(event: ethereum.Event, smartVault: SmartVault, relayed: boolean): TransactionCost {
+  let id = event.transaction.hash.toHexString()
+  let transaction = TransactionCost.load(id)
+
+  if (transaction == null) {
+    transaction = new TransactionCost(id)
+    transaction.smartVault = smartVault.id
+    transaction.gasUsed = BigInt.zero()
+    transaction.gasPrice = BigInt.zero()
+    transaction.costEth = BigInt.zero()
+    transaction.costUsd = BigInt.zero()
+    transaction.relayer = (relayed ? event.transaction.from : ZERO_ADDRESS).toHexString()
+  }
+
+  if (transaction.gasUsed.isZero()) transaction.gasUsed = event.transaction.gasLimit || BigInt.zero()
+  if (transaction.gasPrice.isZero()) transaction.gasPrice = event.transaction.gasPrice || BigInt.zero()
+  if (transaction.costEth.isZero()) transaction.costEth = transaction.gasPrice.times(transaction.gasUsed)
+  if (transaction.costUsd.isZero()) transaction.costUsd = rateInUsd(WETH, transaction.costEth)
+  transaction.save()
+
+  return transaction
+}
+
+function trackGlobalFees(feeUsd: BigInt): void {
+  trackGlobalStats(feeUsd, BigInt.zero(), BigInt.zero())
+}
+
+function trackGlobalStats(feeUsd: BigInt, gasRefundUsd: BigInt, relayedCostUsd: BigInt): void {
   let stats = Stats.load('MIMIC_STATS')
 
   if (stats == null) {
     stats = new Stats('MIMIC_STATS')
     stats.totalFeesUsd = BigInt.zero()
     stats.totalGasRefundsUsd = BigInt.zero()
+    stats.totalRelayedCostUsd = BigInt.zero()
     stats.save()
   }
 
   stats.totalFeesUsd = stats.totalFeesUsd.plus(feeUsd)
   stats.totalGasRefundsUsd = stats.totalGasRefundsUsd.plus(gasRefundUsd)
+  stats.totalRelayedCostUsd = stats.totalRelayedCostUsd.plus(relayedCostUsd)
   stats.save()
 }
 
