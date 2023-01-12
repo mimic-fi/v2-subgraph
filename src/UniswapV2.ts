@@ -25,8 +25,7 @@ function convert(tokenIn: Address, tokenOut: Address, amountIn: BigInt): BigInt 
   let isTokenInLtTokenOut = tokenIn.toHexString().toLowerCase() < tokenOut.toHexString().toLowerCase()
   let tokenInReserve = isTokenInLtTokenOut ? reserves[0] : reserves[1]
   let tokenOutReserve = isTokenInLtTokenOut ? reserves[1] : reserves[0]
-  let div = amountIn.times(tokenOutReserve).div(tokenInReserve)
-  return div
+  return amountIn.times(tokenOutReserve).div(tokenInReserve)
 }
 
 function getReserves(address: Address): Array<BigInt> {

@@ -1,7 +1,7 @@
 import { Address, dataSource, log } from '@graphprotocol/graph-ts'
 
 import { ERC20 as ERC20Entity } from '../types/schema'
-import { ERC20 as ERC20Contract } from '../types/Registry/ERC20'
+import { ERC20 as ERC20Contract } from '../types/templates/SmartVault/ERC20'
 
 const NATIVE_TOKEN_ADDRESS = Address.fromString('0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee')
 

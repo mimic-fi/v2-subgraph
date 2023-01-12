@@ -1,27 +1,3 @@
-type Registry implements Authorizer @entity {
-  id: ID!
-  implementations: [Implementation!] @derivedFrom(field: "registry")
-  permissions: [Permission!] @derivedFrom(field: "target")
-}
-
-type Implementation @entity {
-  id: ID!
-  registry: Registry!
-  namespace: String!
-  stateless: Boolean!
-  deprecated: Boolean!
-  instances: [Instance!] @derivedFrom(field: "implementation")
-  registrar: String!
-  createdAt: BigInt!
-}
-
-type Instance @entity {
-  id: ID!
-  implementation: Implementation!
-  creator: String!
-  createdAt: BigInt!
-}
-
 type SmartVault implements Authorizer @entity {
   id: ID!
   balances: [Balance!] @derivedFrom(field: "smartVault")
