@@ -1,4 +1,4 @@
-specVersion: 0.0.4
+specVersion: 0.0.6
 description: Mimic Finance V2
 repository: https://github.com/mimic-fi/v2-subgraph
 schema:
@@ -13,7 +13,7 @@ dataSources:
       startBlock: {{blockNumber}}
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.5
+      apiVersion: 0.0.7
       language: wasm/assemblyscript
       entities:
         - SmartVaultsFactory
@@ -37,7 +37,7 @@ dataSources:
       startBlock: {{blockNumber}}
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.5
+      apiVersion: 0.0.7
       language: wasm/assemblyscript
       entities:
         - Registry
@@ -60,7 +60,7 @@ templates:
       abi: SmartVault
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.5
+      apiVersion: 0.0.7
       language: wasm/assemblyscript
       entities:
         - SmartVault
@@ -76,24 +76,34 @@ templates:
       eventHandlers:
         - event: Call(indexed address,bytes,uint256,bytes,bytes)
           handler: handleCall
+          receipt: true
         - event: Collect(indexed address,indexed address,uint256,bytes)
           handler: handleCollect
+          receipt: true
         - event: Withdraw(indexed address,indexed address,uint256,uint256,bytes)
           handler: handleWithdraw
+          receipt: true
         - event: Wrap(uint256,uint256,bytes)
           handler: handleWrap
+          receipt: true
         - event: Unwrap(uint256,uint256,bytes)
           handler: handleUnwrap
+          receipt: true
         - event: Claim(indexed address,address[],uint256[],bytes)
           handler: handleClaim
+          receipt: true
         - event: Join(indexed address,address[],uint256[],address[],uint256[],uint256,uint256,bytes)
           handler: handleJoin
+          receipt: true
         - event: Exit(indexed address,address[],uint256[],address[],uint256[],uint256,uint256[],uint256,bytes)
           handler: handleExit
+          receipt: true
         - event: Swap(indexed uint8,indexed address,indexed address,uint256,uint256,uint256,uint256,bytes)
           handler: handleSwap
+          receipt: true
         - event: Bridge(indexed uint8,indexed uint256,indexed address,uint256,uint256,uint256,address,bytes)
           handler: handleBridge
+          receipt: true
         - event: StrategySet(indexed address,bool)
           handler: handleStrategySet
         - event: PriceOracleSet(indexed address)

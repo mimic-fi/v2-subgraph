@@ -3,8 +3,8 @@ import { Address, BigInt, dataSource, log } from '@graphprotocol/graph-ts'
 import { UniswapPair } from '../types/templates/SmartVault/UniswapPair'
 import { UniswapFactory } from '../types/templates/SmartVault/UniswapFactory'
 
-const WETH = Address.fromString('0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2')
-const USDC = Address.fromString('0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48')
+export const WETH = Address.fromString('0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2')
+export const USDC = Address.fromString('0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48')
 const UNISWAP_V2_FACTORY = Address.fromString('0x5c69bee701ef814a2b6a3edd4b1652cb9cc5aa6f')
 
 const ZERO_ADDRESS = Address.fromString('0x0000000000000000000000000000000000000000')
