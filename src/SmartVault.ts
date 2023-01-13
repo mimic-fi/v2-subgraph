@@ -650,8 +650,8 @@ function trackTransactionCost(event: ethereum.Event, smartVault: SmartVault, rel
     transaction.relayer = (relayed ? event.transaction.from : ZERO_ADDRESS).toHexString()
   }
 
-  if (transaction.gasUsed.isZero()) transaction.gasUsed = event.transaction.gasLimit || BigInt.zero()
-  if (transaction.gasPrice.isZero()) transaction.gasPrice = event.transaction.gasPrice || BigInt.zero()
+  if (transaction.gasUsed.isZero()) transaction.gasUsed = event.receipt!.gasUsed
+  if (transaction.gasPrice.isZero()) transaction.gasPrice = event.transaction.gasPrice
   if (transaction.costEth.isZero()) transaction.costEth = transaction.gasPrice.times(transaction.gasUsed)
   if (transaction.costUsd.isZero()) transaction.costUsd = rateInUsd(WETH, transaction.costEth)
   transaction.save()
