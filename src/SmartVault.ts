@@ -43,6 +43,7 @@ import {
 import { rateInUsd, WETH } from './UniswapV2'
 import { loadOrCreateERC20, loadOrCreateNativeToken } from './ERC20'
 import { processAuthorizedEvent, processUnauthorizedEvent } from './Permissions'
+import { getCurrentChainId } from './Networks'
 
 const REDEEM_GAS_NOTE = '0x52454c41594552'
 const ZERO_ADDRESS = Address.fromString('0x0000000000000000000000000000000000000000')
@@ -81,7 +82,7 @@ export function handleCollect(event: Collect): void {
   execution.save()
 
   let tokenOut = loadOrCreateERC20(event.params.token)
-  createMovementOut(event, 1, tokenOut, event.params.collected)
+  createMovementOut(event, 0, tokenOut, event.params.collected)
 }
 
 export function handleWithdraw(event: Withdraw): void {
@@ -97,7 +98,7 @@ export function handleWithdraw(event: Withdraw): void {
   execution.save()
 
   let tokenIn = loadOrCreateERC20(event.params.token)
-  createMovementIn(event, 1, tokenIn, event.params.withdrawn)
+  createMovementIn(event, 0, tokenIn, event.params.withdrawn)
 
   if (!event.params.fee.isZero()) {
     let feeId = getFeeId(event, 0)
@@ -145,10 +146,10 @@ export function handleWrap(event: Wrap): void {
   execution.save()
 
   let tokenIn = loadOrCreateNativeToken()
-  createMovementIn(event, 1, tokenIn, event.params.wrapped)
+  createMovementIn(event, 0, tokenIn, event.params.wrapped)
 
   let tokenOut = ERC20.load(smartVault.wrappedNativeToken)!
-  createMovementOut(event, 2, tokenOut, event.params.wrapped)
+  createMovementOut(event, 1, tokenOut, event.params.wrapped)
 }
 
 export function handleUnwrap(event: Unwrap): void {
@@ -164,10 +165,10 @@ export function handleUnwrap(event: Unwrap): void {
   execution.save()
 
   let tokenIn = ERC20.load(smartVault.wrappedNativeToken)!
-  createMovementIn(event, 1, tokenIn, event.params.unwrapped)
+  createMovementIn(event, 0, tokenIn, event.params.unwrapped)
 
   let tokenOut = loadOrCreateNativeToken()
-  createMovementOut(event, 2, tokenOut, event.params.unwrapped)
+  createMovementOut(event, 1, tokenOut, event.params.unwrapped)
 }
 
 export function handleClaim(event: Claim): void {
@@ -280,10 +281,10 @@ export function handleSwap(event: Swap): void {
   execution.save()
 
   let tokenIn = loadOrCreateERC20(event.params.tokenIn)
-  createMovementIn(event, 1, tokenIn, event.params.amountIn)
+  createMovementIn(event, 0, tokenIn, event.params.amountIn)
 
   let tokenOut = loadOrCreateERC20(event.params.tokenOut)
-  createMovementOut(event, 2, tokenOut, event.params.amountOut)
+  createMovementOut(event, 1, tokenOut, event.params.amountOut)
 
   if (!event.params.fee.isZero()) {
     let feeId = getFeeId(event, 0)
@@ -317,7 +318,9 @@ export function handleBridge(event: Bridge): void {
   execution.save()
 
   let token = loadOrCreateERC20(event.params.token)
-  createMovementIn(event, 1, token, event.params.amountIn)
+  let movement = createMovementIn(event, 0, token, event.params.amountIn)
+  movement.destinationChainId = event.params.chainId
+  movement.save()
 
   if (!event.params.fee.isZero()) {
     let feeId = getFeeId(event, 0)
@@ -588,32 +591,34 @@ function loadOrCreateBalance(event: ethereum.Event, token: ERC20): Balance {
   return balance
 }
 
-function createMovementIn(event: ethereum.Event, index: number, token: ERC20, amount: BigInt): void {
-  createMovement('In', event, index, token, amount)
-
+function createMovementIn(event: ethereum.Event, index: number, token: ERC20, amount: BigInt): Movement {
+  let movement = createMovement('In', event, index, token, amount)
   let balance = loadOrCreateBalance(event, token)
   balance.amount = balance.amount.minus(amount)
   balance.save()
+  return movement
 }
 
-function createMovementOut(event: ethereum.Event, index: number, token: ERC20, amount: BigInt): void {
-  createMovement('Out', event, index, token, amount)
-
+function createMovementOut(event: ethereum.Event, index: number, token: ERC20, amount: BigInt): Movement {
+  let movement = createMovement('Out', event, index, token, amount)
   let balance = loadOrCreateBalance(event, token)
   balance.amount = balance.amount.plus(amount)
   balance.save()
+  return movement
 }
 
-function createMovement(type: string, event: ethereum.Event, index: number, token: ERC20, amount: BigInt): void {
+function createMovement(type: string, event: ethereum.Event, index: number, token: ERC20, amount: BigInt): Movement {
   let movementId = getMovementId(event, index)
   let movement = new Movement(movementId)
   movement.type = type
   movement.smartVault = getSmartVaultId(event)
   movement.transaction = getTransactionId(event)
   movement.primitiveExecution = getExecutionId(event)
+  movement.destinationChainId = BigInt.fromI32(getCurrentChainId())
   movement.token = token.id
   movement.amount = amount
   movement.save()
+  return movement
 }
 
 function trackGlobalFees(feeUsd: BigInt): void {

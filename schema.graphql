@@ -64,6 +64,7 @@ type Movement @entity {
   smartVault: SmartVault!
   transaction: Transaction!
   primitiveExecution: PrimitiveExecution!
+  destinationChainId: BigInt!
   type: MovementType!
   token: ERC20!
   amount: BigInt!
