@@ -133,7 +133,7 @@ export function handleWithdraw(event: Withdraw): void {
   smartVault.totalRelayedCostUsd = smartVault.totalRelayedCostUsd.plus(relayedCostUsd)
   smartVault.save()
 
-  trackGlobalStats(feeUsd, gasRefundUsd, relayedCostUsd)
+  trackGlobalStats(amountUsd, feeUsd, gasRefundUsd, relayedCostUsd)
 }
 
 export function handleWrap(event: Wrap): void {
@@ -660,10 +660,10 @@ function trackTransactionCost(event: ethereum.Event, smartVault: SmartVault, rel
 }
 
 function trackGlobalFees(feeUsd: BigInt): void {
-  trackGlobalStats(feeUsd, BigInt.zero(), BigInt.zero())
+  trackGlobalStats(BigInt.zero(), feeUsd, BigInt.zero(), BigInt.zero())
 }
 
-function trackGlobalStats(feeUsd: BigInt, gasRefundUsd: BigInt, relayedCostUsd: BigInt): void {
+function trackGlobalStats(valueManagedUsd: BigInt, feeUsd: BigInt, gasRefundUsd: BigInt, relayedCostUsd: BigInt): void {
   let stats = Stats.load('MIMIC_STATS')
 
   if (stats == null) {
@@ -674,6 +674,7 @@ function trackGlobalStats(feeUsd: BigInt, gasRefundUsd: BigInt, relayedCostUsd: 
     stats.save()
   }
 
+  stats.totalValueManaged = stats.totalValueManaged.plus(valueManagedUsd)
   stats.totalFeesUsd = stats.totalFeesUsd.plus(feeUsd)
   stats.totalGasRefundsUsd = stats.totalGasRefundsUsd.plus(gasRefundUsd)
   stats.totalRelayedCostUsd = stats.totalRelayedCostUsd.plus(relayedCostUsd)
