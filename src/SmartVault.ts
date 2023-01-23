@@ -40,7 +40,8 @@ import {
   FeeCollectorSet
 } from '../types/templates/SmartVault/SmartVault'
 
-import { rateInUsd, WETH } from './UniswapV2'
+import { getWeth } from './Tokens'
+import { rateInUsd } from './UniswapV3'
 import { loadOrCreateERC20, loadOrCreateNativeToken } from './ERC20'
 import { processAuthorizedEvent, processUnauthorizedEvent } from './Permissions'
 
@@ -653,7 +654,7 @@ function trackTransactionCost(event: ethereum.Event, smartVault: SmartVault, rel
   if (transaction.gasUsed.isZero()) transaction.gasUsed = event.receipt!.gasUsed
   if (transaction.gasPrice.isZero()) transaction.gasPrice = event.transaction.gasPrice
   if (transaction.costEth.isZero()) transaction.costEth = transaction.gasPrice.times(transaction.gasUsed)
-  if (transaction.costUsd.isZero()) transaction.costUsd = rateInUsd(WETH, transaction.costEth)
+  if (transaction.costUsd.isZero()) transaction.costUsd = rateInUsd(getWeth(), transaction.costEth)
   transaction.save()
 
   return transaction
