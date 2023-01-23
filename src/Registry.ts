@@ -13,7 +13,7 @@ export function handleCloned(event: Cloned): void {
   if (namespace == SMART_VAULT_NAMESPACE) {
     log.warning('New smart vault {}', [event.params.instance.toHexString()])
     SmartVaultTemplate.create(event.params.instance)
-    loadOrCreateSmartVault(event.params.instance)
+    loadOrCreateSmartVault(event)
   }
 }
 

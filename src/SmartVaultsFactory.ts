@@ -8,5 +8,5 @@ import { loadOrCreateSmartVault } from './SmartVault'
 export function handleCreated(event: Created): void {
   log.warning('New smart vault {}', [event.params.instance.toHexString()])
   SmartVaultTemplate.create(event.params.instance)
-  loadOrCreateSmartVault(event.params.instance)
+  loadOrCreateSmartVault(event)
 }

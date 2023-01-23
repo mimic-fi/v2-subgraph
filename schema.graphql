@@ -7,30 +7,42 @@ type SmartVault implements Authorizer @entity {
   bridgeConnector: String!
   strategies: [String!]!
   feeCollector: String!
-  totalValueManaged: BigInt!
   wrappedNativeToken: ERC20!
   swapFee: FeeConfig @derivedFrom(field: "smartVault")
   withdrawFee: FeeConfig @derivedFrom(field: "smartVault")
   performanceFee: FeeConfig @derivedFrom(field: "smartVault")
-  paidFees: [FeePaid!] @derivedFrom(field: "smartVault")
-  primitiveExecutions: [PrimitiveExecution!] @derivedFrom(field: "smartVault")
-  permissions: [Permission!] @derivedFrom(field: "target")
+  totalValueManaged: BigInt!
   totalFeesUsd: BigInt!
   totalGasRefundsUsd: BigInt!
   totalRelayedCostUsd: BigInt!
-  relayedTransactionsCosts: [TransactionCost!] @derivedFrom(field: "smartVault")
+  fees: [Fee!] @derivedFrom(field: "smartVault")
+  transactions: [Transaction!] @derivedFrom(field: "smartVault")
+  primitiveExecutions: [PrimitiveExecution!] @derivedFrom(field: "smartVault")
+  permissions: [Permission!] @derivedFrom(field: "target")
+}
+
+type Transaction @entity {
+  id: ID!
+  smartVault: SmartVault!
+  sender: String!
+  target: Bytes
+  gasUsed: BigInt!
+  gasPrice: BigInt!
+  costEth: BigInt!
+  costUsd: BigInt!
+  relayer: String!
+  executedAt: BigInt!
+  fees: [Fee!] @derivedFrom(field: "transaction")
+  primitiveExecutions: [PrimitiveExecution!] @derivedFrom(field: "transaction")
 }
 
 type PrimitiveExecution @entity {
   id: ID!
   type: Primitive!
   smartVault: SmartVault!
+  transaction: Transaction!
   data: String!
-  executedAt: BigInt!
-  transaction: String!
-  sender: String!
-  target: Bytes
-  fee: FeePaid @derivedFrom(field: "primitiveExecution")
+  fee: Fee @derivedFrom(field: "primitiveExecution")
   movements: [Movement!] @derivedFrom(field: "primitiveExecution")
 }
 
@@ -49,11 +61,12 @@ enum Primitive {
 
 type Movement @entity {
   id: ID!
+  smartVault: SmartVault!
+  transaction: Transaction!
+  primitiveExecution: PrimitiveExecution!
   type: MovementType!
   token: ERC20!
   amount: BigInt!
-  smartVault: SmartVault!
-  primitiveExecution: PrimitiveExecution!
 }
 
 enum MovementType {
@@ -61,9 +74,10 @@ enum MovementType {
   Out
 }
 
-type FeePaid @entity {
+type Fee @entity {
   id: ID!
   smartVault: SmartVault!
+  transaction: Transaction!
   primitiveExecution: PrimitiveExecution!
   pct: BigInt!
   token: ERC20!
@@ -117,16 +131,6 @@ type Permission @entity {
 type Grantee @entity {
   id: ID!
   permissions: [Permission!]!
-}
-
-type TransactionCost @entity {
-  id: ID!
-  smartVault: SmartVault!
-  gasUsed: BigInt!
-  gasPrice: BigInt!
-  costEth: BigInt!
-  costUsd: BigInt!
-  relayer: String!
 }
 
 type Stats @entity {
