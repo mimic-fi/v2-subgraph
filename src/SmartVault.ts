@@ -425,6 +425,9 @@ export function handlePerformanceFeeSet(event: PerformanceFeeSet): void {
   performanceFee.token = loadOrCreateERC20(event.params.token).id
   performanceFee.period = event.params.period
   performanceFee.save()
+
+  smartVault.performanceFee = performanceFee.id
+  smartVault.save()
 }
 
 export function handleWithdrawFeeSet(event: WithdrawFeeSet): void {
@@ -442,6 +445,9 @@ export function handleWithdrawFeeSet(event: WithdrawFeeSet): void {
   withdrawFee.token = loadOrCreateERC20(event.params.token).id
   withdrawFee.period = event.params.period
   withdrawFee.save()
+
+  smartVault.withdrawFee = withdrawFee.id
+  smartVault.save()
 }
 
 export function handleSwapFeeSet(event: SwapFeeSet): void {
@@ -459,6 +465,9 @@ export function handleSwapFeeSet(event: SwapFeeSet): void {
   swapFee.token = loadOrCreateERC20(event.params.token).id
   swapFee.period = event.params.period
   swapFee.save()
+
+  smartVault.swapFee = swapFee.id
+  smartVault.save()
 }
 
 export function handleBridgeFeeSet(event: BridgeFeeSet): void {
@@ -476,6 +485,9 @@ export function handleBridgeFeeSet(event: BridgeFeeSet): void {
   bridgeFee.token = loadOrCreateERC20(event.params.token).id
   bridgeFee.period = event.params.period
   bridgeFee.save()
+
+  smartVault.bridgeFee = bridgeFee.id
+  smartVault.save()
 }
 
 export function getWrappedNativeToken(address: Address): Address {

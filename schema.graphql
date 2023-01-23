@@ -9,9 +9,10 @@ type SmartVault implements Authorizer @entity {
   feeCollector: String!
   totalValueManaged: BigInt!
   wrappedNativeToken: ERC20!
-  swapFee: FeeConfig @derivedFrom(field: "smartVault")
-  withdrawFee: FeeConfig @derivedFrom(field: "smartVault")
-  performanceFee: FeeConfig @derivedFrom(field: "smartVault")
+  swapFee: FeeConfig
+  bridgeFee: FeeConfig
+  withdrawFee: FeeConfig
+  performanceFee: FeeConfig
   paidFees: [FeePaid!] @derivedFrom(field: "smartVault")
   primitiveExecutions: [PrimitiveExecution!] @derivedFrom(field: "smartVault")
   permissions: [Permission!] @derivedFrom(field: "target")
