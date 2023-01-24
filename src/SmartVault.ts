@@ -681,6 +681,7 @@ function trackGlobalStats(valueManagedUsd: BigInt, feeUsd: BigInt, gasRefundUsd:
 
   if (stats == null) {
     stats = new Stats('MIMIC_STATS')
+    stats.totalValueManaged = BigInt.zero()
     stats.totalFeesUsd = BigInt.zero()
     stats.totalGasRefundsUsd = BigInt.zero()
     stats.totalRelayedCostUsd = BigInt.zero()
