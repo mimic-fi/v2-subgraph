@@ -10,11 +10,10 @@ import {
   isGoerli,
   isMainnet,
   isMaticNetwork,
-  isMumbai, isOptimism,
+  isMumbai,
+  isOptimism,
   isPolygon
 } from './Networks'
-
-export const NATIVE_TOKEN_ADDRESS = Address.fromString('0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee')
 
 export function getUsdc(): Address {
   return Address.fromString(getUsdcAddress())

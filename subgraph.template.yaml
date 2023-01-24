@@ -69,6 +69,8 @@ templates:
           file: ./node_modules/@mimic-fi/v2-smart-vault/artifacts/contracts/ISmartVault.sol/ISmartVault.json
         - name: ERC20
           file: ./node_modules/@uniswap/v3-periphery/artifacts/contracts/interfaces/IERC20Metadata.sol/IERC20Metadata.json
+        - name: UniswapPool
+          file: ./node_modules/@uniswap/v3-core/artifacts/contracts/interfaces/pool/IUniswapV3PoolState.sol/IUniswapV3PoolState.json
         - name: UniswapFactory
           file: ./node_modules/@uniswap/v3-core/artifacts/contracts/interfaces/IUniswapV3Factory.sol/IUniswapV3Factory.json
         - name: UniswapRouter

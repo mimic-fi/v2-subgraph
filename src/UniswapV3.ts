@@ -1,13 +1,16 @@
 import { Address, BigInt, log } from '@graphprotocol/graph-ts'
 
-import { getUsdc, getWeth } from './Tokens'
-import { isEthNetwork, isMaticNetwork } from './Networks'
-import { ERC20 } from '../types/templates/SmartVault/ERC20'
+import { UniswapPool } from '../types/templates/SmartVault/UniswapPool'
 import { UniswapRouter } from '../types/templates/SmartVault/UniswapRouter'
 import { UniswapFactory } from '../types/templates/SmartVault/UniswapFactory'
 
+import { getUsdc, getWeth } from './Tokens'
+import { isEthNetwork, isMaticNetwork } from './Networks'
+
+const POW_2_192 = BigInt.fromI32(2).pow(192)
 const ZERO_ADDRESS = Address.fromString('0x0000000000000000000000000000000000000000')
-const UNISWAP_V3_ROUTER = Address.fromString('0xE592427A0AEce92De3Edee1F18E0157C05861564')
+
+export const UNISWAP_V3_ROUTER = Address.fromString('0xE592427A0AEce92De3Edee1F18E0157C05861564')
 
 export function rateInUsd(token: Address, amount: BigInt): BigInt {
   if (!isEthNetwork() && !isMaticNetwork()) return BigInt.zero()
@@ -22,40 +25,53 @@ export function rateInUsd(token: Address, amount: BigInt): BigInt {
 
 function convert(tokenIn: Address, tokenOut: Address, amountIn: BigInt): BigInt {
   if (amountIn.isZero()) return BigInt.zero()
-  let poolAddress = getPool(tokenIn, tokenOut)
-  if (poolAddress.equals(ZERO_ADDRESS)) return BigInt.zero()
 
-  let tokenInReserve = getBalanceOf(tokenIn, poolAddress)
-  if (tokenInReserve.isZero()) return BigInt.zero()
+  let pool = getLowestFeePool(tokenIn, tokenOut)
+  if (pool.equals(ZERO_ADDRESS)) return BigInt.zero()
 
-  let tokenOutReserve = getBalanceOf(tokenOut, poolAddress)
-  return amountIn.times(tokenOutReserve).div(tokenInReserve)
+  // sqrtPriceX96 is the sqrt price between token0/token1 expressed in Q64.96
+  // therefore, the price can be computed as: sqrtPriceX96 ** 2 / 2 ** 192
+
+  let sqrtPriceX96 = getSqrtPriceX96(pool)
+  // price = sqrtPriceX96.times(sqrtPriceX96).div(POW_2_192)
+
+  // To avoid losing precision we do:
+  if (tokenIn.toHexString().toLowerCase() < tokenOut.toHexString().toLowerCase()) {
+    // tokenIn is token0 => amountIn * price
+    return amountIn.times(sqrtPriceX96).times(sqrtPriceX96).div(POW_2_192)
+  } else {
+    // tokenOut is token0 => amountIn / price
+    return amountIn.times(POW_2_192).div(sqrtPriceX96).div(sqrtPriceX96)
+  }
 }
 
-function getBalanceOf(token: Address, pool: Address): BigInt {
-  let erc20 = ERC20.bind(token)
-  let balanceOf_call = erc20.try_balanceOf(pool)
+function getSqrtPriceX96(address: Address): BigInt {
+  let pool = UniswapPool.bind(address)
+  let slot0Call = pool.try_slot0()
 
-  if (!balanceOf_call.reverted) {
-    return balanceOf_call.value
+  if (!slot0Call.reverted) {
+    return slot0Call.value.value0
   }
 
-  log.warning('balanceOf() call reverted for token {} and pool {}', [token.toHexString(), pool.toHexString()])
+  log.warning('slot0() call reverted for pool {}', [address.toHexString()])
   return BigInt.zero()
 }
 
-function getPool(tokenA: Address, tokenB: Address): Address {
-  let pool500 = getPoolForFee(tokenA, tokenB, 500)
+function getLowestFeePool(tokenA: Address, tokenB: Address): Address {
+  let pool500 = getPool(tokenA, tokenB, 500)
   if (!pool500.equals(ZERO_ADDRESS)) return pool500
 
-  let pool3000 = getPoolForFee(tokenA, tokenB, 3000)
+  let pool3000 = getPool(tokenA, tokenB, 3000)
   if (!pool3000.equals(ZERO_ADDRESS)) return pool3000
 
-  let pool10000 = getPoolForFee(tokenA, tokenB, 10000)
-  return pool10000
+  let pool10000 = getPool(tokenA, tokenB, 10000)
+  if (!pool10000.equals(ZERO_ADDRESS)) return pool10000
+
+  log.warning('Could not find pool for tokens {} and {}', [tokenA.toHexString(), tokenB.toHexString()])
+  return ZERO_ADDRESS
 }
 
-function getPoolForFee(tokenA: Address, tokenB: Address, fee: i32): Address {
+function getPool(tokenA: Address, tokenB: Address, fee: i32): Address {
   let factory = UniswapFactory.bind(getFactory())
   let poolCall = factory.try_getPool(tokenA, tokenB, fee)
 
