@@ -1,4 +1,4 @@
-import { Address, BigInt, dataSource, log } from '@graphprotocol/graph-ts'
+import { Address, BigInt, log } from '@graphprotocol/graph-ts'
 
 import { getUsdc, getWeth } from './Tokens'
 import { isEthNetwork, isMaticNetwork } from './Networks'
@@ -15,7 +15,6 @@ export function rateInUsd(token: Address, amount: BigInt): BigInt {
   const USDC = getUsdc()
   const WETH = getWeth()
 
-  if (dataSource.network() != 'mainnet') return BigInt.zero()
   if (token.equals(USDC)) return amount
   if (token.equals(WETH)) return convert(WETH, USDC, amount)
   return convert(WETH, USDC, convert(token, WETH, amount))
@@ -64,7 +63,8 @@ function getPoolForFee(tokenA: Address, tokenB: Address, fee: i32): Address {
     return poolCall.value
   }
 
-  log.warning('getPool() call reverted for tokens {} {} and fee {}', [tokenA.toHexString(), tokenB.toHexString(), fee.toString()])
+  let params = [tokenA.toHexString(), tokenB.toHexString(), fee.toString()]
+  log.warning('getPool() call reverted for tokens {} {} and fee {}', params)
   return ZERO_ADDRESS
 }
 
