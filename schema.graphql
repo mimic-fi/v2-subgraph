@@ -6,19 +6,19 @@ type SmartVault implements Authorizer @entity {
   bridgeConnector: String!
   strategies: [String!]!
   feeCollector: String!
-  bridgeFee: FeeConfig
   swapFee: FeeConfig
+  bridgeFee: FeeConfig
   withdrawFee: FeeConfig
   performanceFee: FeeConfig
   totalValueManaged: BigInt!
   totalFeesUsd: BigInt!
   totalGasRefundsUsd: BigInt!
   totalRelayedCostUsd: BigInt!
-  balances: [Balance!] @derivedFrom(field: "smartVault")
-  priceFeeds: [PriceFeed!] @derivedFrom(field: "smartVault")
   fees: [Fee!] @derivedFrom(field: "smartVault")
+  balances: [Balance!] @derivedFrom(field: "smartVault")
   transactions: [Transaction!] @derivedFrom(field: "smartVault")
   primitiveExecutions: [PrimitiveExecution!] @derivedFrom(field: "smartVault")
+  priceFeeds: [PriceFeed!] @derivedFrom(field: "smartVault")
   permissions: [Permission!] @derivedFrom(field: "target")
 }
 
@@ -65,6 +65,7 @@ type Movement @entity {
   smartVault: SmartVault!
   transaction: Transaction!
   primitiveExecution: PrimitiveExecution!
+  destinationChainId: BigInt!
   type: MovementType!
   token: ERC20!
   amount: BigInt!

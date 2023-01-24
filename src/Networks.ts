@@ -47,3 +47,17 @@ export function isFantom(): boolean {
 export function isGnosis(): boolean {
   return dataSource.network() == 'gnosis'
 }
+
+export function getCurrentChainId(): i32 {
+  if (isMainnet()) return 1
+  if (isPolygon()) return 137
+  if (isOptimism()) return 10
+  if (isGnosis()) return 100
+  if (isFantom()) return 250
+  if (isArbitrum()) return 42161
+  if (isAvalanche()) return 43114
+  if (isBinance()) return 56
+  if (isGoerli()) return 5
+  if (isMumbai()) return 80001
+  return 0
+}
