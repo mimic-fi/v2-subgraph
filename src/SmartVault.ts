@@ -6,13 +6,13 @@ import {
   Balance,
   ERC20,
   FeeConfig,
-  FeePaid,
+  Fee,
   PriceFeed,
   PrimitiveExecution,
   Movement,
   SmartVault,
   Stats,
-  TransactionCost
+  Transaction
 } from '../types/schema'
 
 import {
@@ -57,60 +57,54 @@ export function handleUnauthorized(event: Unauthorized): void {
 }
 
 export function handleCall(event: Call): void {
-  let smartVault = loadOrCreateSmartVault(event.address)
-  let executionId = smartVault.id + '/executions/' + getTransactionId(event)
+  let smartVault = loadOrCreateSmartVault(event)
+  let transaction = loadOrCreateTransaction(event)
+
+  let executionId = getExecutionId(event)
   let execution = new PrimitiveExecution(executionId)
   execution.type = 'Call'
+  execution.transaction = transaction.id
   execution.smartVault = smartVault.id
   execution.data = event.params.data.toHexString()
-  execution.executedAt = event.block.timestamp
-  execution.transaction = event.transaction.hash.toHexString()
-  execution.sender = event.transaction.from.toHexString()
-  execution.target = event.transaction.to
   execution.save()
-
-  trackTransactionCost(event, smartVault, false)
 }
 
 export function handleCollect(event: Collect): void {
-  let smartVault = loadOrCreateSmartVault(event.address)
-  let executionId = smartVault.id + '/executions/' + getTransactionId(event)
+  let smartVault = loadOrCreateSmartVault(event)
+  let transaction = loadOrCreateTransaction(event)
+
+  let executionId = getExecutionId(event)
   let execution = new PrimitiveExecution(executionId)
   execution.type = 'Collect'
   execution.smartVault = smartVault.id
+  execution.transaction = transaction.id
   execution.data = event.params.data.toHexString()
-  execution.executedAt = event.block.timestamp
-  execution.transaction = event.transaction.hash.toHexString()
-  execution.sender = event.transaction.from.toHexString()
-  execution.target = event.transaction.to
   execution.save()
 
   let tokenOut = loadOrCreateERC20(event.params.token)
-  createMovementOut(event, 1, execution, tokenOut, event.params.collected)
-
-  trackTransactionCost(event, smartVault, false)
+  createMovementOut(event, 1, tokenOut, event.params.collected)
 }
 
 export function handleWithdraw(event: Withdraw): void {
-  let smartVault = loadOrCreateSmartVault(event.address)
-  let executionId = smartVault.id + '/executions/' + getTransactionId(event)
+  let smartVault = loadOrCreateSmartVault(event)
+  let transaction = loadOrCreateTransaction(event)
+
+  let executionId = getExecutionId(event)
   let execution = new PrimitiveExecution(executionId)
   execution.type = 'Withdraw'
+  execution.transaction = transaction.id
   execution.smartVault = smartVault.id
   execution.data = event.params.data.toHexString()
-  execution.executedAt = event.block.timestamp
-  execution.transaction = event.transaction.hash.toHexString()
-  execution.sender = event.transaction.from.toHexString()
-  execution.target = event.transaction.to
   execution.save()
 
   let tokenIn = loadOrCreateERC20(event.params.token)
-  createMovementIn(event, 1, execution, tokenIn, event.params.withdrawn)
+  createMovementIn(event, 1, tokenIn, event.params.withdrawn)
 
   if (!event.params.fee.isZero()) {
-    let feeId = smartVault.id + '/paid-fees/' + getTransactionId(event)
-    let fee = new FeePaid(feeId)
+    let feeId = getFeeId(event, 0)
+    let fee = new Fee(feeId)
     fee.smartVault = smartVault.id
+    fee.transaction = transaction.id
     fee.primitiveExecution = execution.id
     fee.token = tokenIn.id
     fee.amount = event.params.fee
@@ -126,11 +120,13 @@ export function handleWithdraw(event: Withdraw): void {
   smartVault.totalFeesUsd = smartVault.totalFeesUsd.plus(feeUsd)
 
   let isRelayedTx = event.params.data.toHexString() == REDEEM_GAS_NOTE
-  let gasRefundUsd = isRelayedTx ? amountUsd : BigInt.zero()
-  let transactionCost = trackTransactionCost(event, smartVault, isRelayedTx)
-  let relayedCostUsd = isRelayedTx ? transactionCost.costUsd : BigInt.zero()
+  transaction.relayer = (isRelayedTx ? event.transaction.from : ZERO_ADDRESS).toHexString()
+  transaction.save()
 
+  let gasRefundUsd = isRelayedTx ? amountUsd : BigInt.zero()
   smartVault.totalGasRefundsUsd = smartVault.totalGasRefundsUsd.plus(gasRefundUsd)
+
+  let relayedCostUsd = isRelayedTx ? transaction.costUsd : BigInt.zero()
   smartVault.totalRelayedCostUsd = smartVault.totalRelayedCostUsd.plus(relayedCostUsd)
   smartVault.save()
 
@@ -138,84 +134,73 @@ export function handleWithdraw(event: Withdraw): void {
 }
 
 export function handleWrap(event: Wrap): void {
-  let smartVault = loadOrCreateSmartVault(event.address)
-  let executionId = smartVault.id + '/executions/' + getTransactionId(event)
+  let smartVault = loadOrCreateSmartVault(event)
+  let transaction = loadOrCreateTransaction(event)
+
+  let executionId = getExecutionId(event)
   let execution = new PrimitiveExecution(executionId)
   execution.type = 'Wrap'
   execution.smartVault = smartVault.id
+  execution.transaction = transaction.id
   execution.data = event.params.data.toHexString()
-  execution.executedAt = event.block.timestamp
-  execution.transaction = event.transaction.hash.toHexString()
-  execution.sender = event.transaction.from.toHexString()
-  execution.target = event.transaction.to
   execution.save()
 
   let tokenIn = loadOrCreateNativeToken()
-  createMovementIn(event, 1, execution, tokenIn, event.params.wrapped)
+  createMovementIn(event, 1, tokenIn, event.params.wrapped)
 
   let tokenOut = ERC20.load(smartVault.wrappedNativeToken)!
-  createMovementOut(event, 2, execution, tokenOut, event.params.wrapped)
-
-  trackTransactionCost(event, smartVault, false)
+  createMovementOut(event, 2, tokenOut, event.params.wrapped)
 }
 
 export function handleUnwrap(event: Unwrap): void {
-  let smartVault = loadOrCreateSmartVault(event.address)
-  let executionId = smartVault.id + '/executions/' + getTransactionId(event)
+  let smartVault = loadOrCreateSmartVault(event)
+  let transaction = loadOrCreateTransaction(event)
+
+  let executionId = getExecutionId(event)
   let execution = new PrimitiveExecution(executionId)
   execution.type = 'Unwrap'
   execution.smartVault = smartVault.id
+  execution.transaction = transaction.id
   execution.data = event.params.data.toHexString()
-  execution.executedAt = event.block.timestamp
-  execution.transaction = event.transaction.hash.toHexString()
-  execution.sender = event.transaction.from.toHexString()
-  execution.target = event.transaction.to
   execution.save()
 
   let tokenIn = ERC20.load(smartVault.wrappedNativeToken)!
-  createMovementIn(event, 1, execution, tokenIn, event.params.unwrapped)
+  createMovementIn(event, 1, tokenIn, event.params.unwrapped)
 
   let tokenOut = loadOrCreateNativeToken()
-  createMovementOut(event, 2, execution, tokenOut, event.params.unwrapped)
-
-  trackTransactionCost(event, smartVault, false)
+  createMovementOut(event, 2, tokenOut, event.params.unwrapped)
 }
 
 export function handleClaim(event: Claim): void {
-  let smartVault = loadOrCreateSmartVault(event.address)
-  let rewardTokens = event.params.tokens
-  let rewardAmounts = event.params.amounts
+  let smartVault = loadOrCreateSmartVault(event)
+  let transaction = loadOrCreateTransaction(event)
 
-  let executionId = smartVault.id + '/executions/' + getTransactionId(event)
+  let executionId = getExecutionId(event)
   let execution = new PrimitiveExecution(executionId)
   execution.type = 'Claim'
   execution.smartVault = smartVault.id
+  execution.transaction = transaction.id
   execution.data = event.params.data.toHexString()
-  execution.executedAt = event.block.timestamp
-  execution.transaction = event.transaction.hash.toHexString()
-  execution.sender = event.transaction.from.toHexString()
-  execution.target = event.transaction.to
   execution.save()
 
+  let rewardTokens = event.params.tokens
+  let rewardAmounts = event.params.amounts
   for (let i: i32 = 0; i < rewardTokens.length; i++) {
     let tokenOut = loadOrCreateERC20(rewardTokens[i])
-    createMovementOut(event, i, execution, tokenOut, rewardAmounts[i])
+    createMovementOut(event, i, tokenOut, rewardAmounts[i])
   }
-
-  trackTransactionCost(event, smartVault, false)
 }
 
 export function handleJoin(event: Join): void {
-  let smartVault = loadOrCreateSmartVault(event.address)
-  let executionId = smartVault.id + '/executions/' + getTransactionId(event)
+  let smartVault = loadOrCreateSmartVault(event)
+  let transaction = loadOrCreateTransaction(event)
+
+  let executionId = getExecutionId(event)
   let execution = new PrimitiveExecution(executionId)
   execution.type = 'Join'
   execution.smartVault = smartVault.id
+  execution.transaction = transaction.id
   execution.data = event.params.data.toHexString()
-  execution.executedAt = event.block.timestamp
-  execution.transaction = event.transaction.hash.toHexString()
-  execution.sender = event.transaction.from.toHexString()
-  execution.target = event.transaction.to
   execution.save()
 
   let tokensIn = event.params.tokensIn
@@ -223,7 +208,7 @@ export function handleJoin(event: Join): void {
   for (let i: i32 = 0; i < tokensIn.length; i++) {
     let amountIn = amountsIn[i]
     let tokenIn = loadOrCreateERC20(tokensIn[i])
-    createMovementIn(event, i, execution, tokenIn, amountIn)
+    createMovementIn(event, i, tokenIn, amountIn)
   }
 
   let tokensOut = event.params.tokensOut
@@ -231,23 +216,20 @@ export function handleJoin(event: Join): void {
   for (let i: i32 = 0; i < tokensOut.length; i++) {
     let amountOut = amountsOut[i]
     let tokenOut = loadOrCreateERC20(tokensOut[i])
-    createMovementOut(event, i, execution, tokenOut, amountOut)
+    createMovementOut(event, i, tokenOut, amountOut)
   }
-
-  trackTransactionCost(event, smartVault, false)
 }
 
 export function handleExit(event: Exit): void {
-  let smartVault = loadOrCreateSmartVault(event.address)
-  let executionId = smartVault.id + '/executions/' + getTransactionId(event)
+  let smartVault = loadOrCreateSmartVault(event)
+  let transaction = loadOrCreateTransaction(event)
+
+  let executionId = getExecutionId(event)
   let execution = new PrimitiveExecution(executionId)
   execution.type = 'Exit'
   execution.smartVault = smartVault.id
+  execution.transaction = transaction.id
   execution.data = event.params.data.toHexString()
-  execution.executedAt = event.block.timestamp
-  execution.transaction = event.transaction.hash.toHexString()
-  execution.sender = event.transaction.from.toHexString()
-  execution.target = event.transaction.to
   execution.save()
 
   let tokensIn = event.params.tokensIn
@@ -255,7 +237,7 @@ export function handleExit(event: Exit): void {
   for (let i: i32 = 0; i < tokensIn.length; i++) {
     let amountIn = amountsIn[i]
     let tokenIn = loadOrCreateERC20(tokensIn[i])
-    createMovementIn(event, i, execution, tokenIn, amountIn)
+    createMovementIn(event, i, tokenIn, amountIn)
   }
 
   let fees = event.params.fees
@@ -264,12 +246,13 @@ export function handleExit(event: Exit): void {
   for (let i: i32 = 0; i < tokensOut.length; i++) {
     let amountOut = amountsOut[i]
     let tokenOut = loadOrCreateERC20(tokensOut[i])
-    createMovementOut(event, i, execution, tokenOut, amountOut)
+    createMovementOut(event, i, tokenOut, amountOut)
 
     if (!fees[i].isZero()) {
-      let feeId = smartVault.id + '/paid-fees/' + getTransactionId(event) + '/' + i.toString()
-      let fee = new FeePaid(feeId)
+      let feeId = getFeeId(event, i)
+      let fee = new Fee(feeId)
       fee.smartVault = smartVault.id
+      fee.transaction = transaction.id
       fee.primitiveExecution = execution.id
       fee.token = tokenOut.id
       fee.amount = fees[i]
@@ -281,36 +264,33 @@ export function handleExit(event: Exit): void {
     let feeUsd = rateInUsd(tokensOut[i], fees[i])
     smartVault.totalFeesUsd = smartVault.totalFeesUsd.plus(feeUsd)
     smartVault.save()
-
     trackGlobalFees(feeUsd)
   }
-
-  trackTransactionCost(event, smartVault, false)
 }
 
 export function handleSwap(event: Swap): void {
-  let smartVault = loadOrCreateSmartVault(event.address)
-  let executionId = smartVault.id + '/executions/' + getTransactionId(event)
+  let smartVault = loadOrCreateSmartVault(event)
+  let transaction = loadOrCreateTransaction(event)
+
+  let executionId = getExecutionId(event)
   let execution = new PrimitiveExecution(executionId)
   execution.type = 'Swap'
   execution.smartVault = smartVault.id
+  execution.transaction = transaction.id
   execution.data = event.params.data.toHexString()
-  execution.executedAt = event.block.timestamp
-  execution.transaction = event.transaction.hash.toHexString()
-  execution.sender = event.transaction.from.toHexString()
-  execution.target = event.transaction.to
   execution.save()
 
   let tokenIn = loadOrCreateERC20(event.params.tokenIn)
-  createMovementIn(event, 1, execution, tokenIn, event.params.amountIn)
+  createMovementIn(event, 1, tokenIn, event.params.amountIn)
 
   let tokenOut = loadOrCreateERC20(event.params.tokenOut)
-  createMovementOut(event, 2, execution, tokenOut, event.params.amountOut)
+  createMovementOut(event, 2, tokenOut, event.params.amountOut)
 
   if (!event.params.fee.isZero()) {
-    let feeId = smartVault.id + '/paid-fees/' + getTransactionId(event)
-    let fee = new FeePaid(feeId)
+    let feeId = getFeeId(event, 0)
+    let fee = new Fee(feeId)
     fee.smartVault = smartVault.id
+    fee.transaction = transaction.id
     fee.primitiveExecution = execution.id
     fee.token = tokenOut.id
     fee.amount = event.params.fee
@@ -322,31 +302,29 @@ export function handleSwap(event: Swap): void {
   let feeUsd = rateInUsd(event.params.tokenOut, event.params.fee)
   smartVault.totalFeesUsd = smartVault.totalFeesUsd.plus(feeUsd)
   smartVault.save()
-
   trackGlobalFees(feeUsd)
-  trackTransactionCost(event, smartVault, false)
 }
 
 export function handleBridge(event: Bridge): void {
-  let smartVault = loadOrCreateSmartVault(event.address)
-  let executionId = smartVault.id + '/executions/' + getTransactionId(event)
+  let smartVault = loadOrCreateSmartVault(event)
+  let transaction = loadOrCreateTransaction(event)
+
+  let executionId = getExecutionId(event)
   let execution = new PrimitiveExecution(executionId)
   execution.type = 'Bridge'
   execution.smartVault = smartVault.id
+  execution.transaction = transaction.id
   execution.data = event.params.data.toHexString()
-  execution.executedAt = event.block.timestamp
-  execution.transaction = event.transaction.hash.toHexString()
-  execution.sender = event.transaction.from.toHexString()
-  execution.target = event.transaction.to
   execution.save()
 
   let token = loadOrCreateERC20(event.params.token)
-  createMovementIn(event, 1, execution, token, event.params.amountIn)
+  createMovementIn(event, 1, token, event.params.amountIn)
 
   if (!event.params.fee.isZero()) {
-    let feeId = smartVault.id + '/paid-fees/' + getTransactionId(event)
-    let fee = new FeePaid(feeId)
+    let feeId = getFeeId(event, 0)
+    let fee = new Fee(feeId)
     fee.smartVault = smartVault.id
+    fee.transaction = transaction.id
     fee.primitiveExecution = execution.id
     fee.token = token.id
     fee.amount = event.params.fee
@@ -358,13 +336,11 @@ export function handleBridge(event: Bridge): void {
   let feeUsd = rateInUsd(event.params.token, event.params.fee)
   smartVault.totalFeesUsd = smartVault.totalFeesUsd.plus(feeUsd)
   smartVault.save()
-
   trackGlobalFees(feeUsd)
-  trackTransactionCost(event, smartVault, false)
 }
 
 export function handleStrategySet(event: StrategySet): void {
-  let smartVault = loadOrCreateSmartVault(event.address)
+  let smartVault = loadOrCreateSmartVault(event)
   let strategies = smartVault.strategies
 
   let strategy = event.params.strategy.toHexString()
@@ -377,13 +353,13 @@ export function handleStrategySet(event: StrategySet): void {
 }
 
 export function handlePriceOracleSet(event: PriceOracleSet): void {
-  let smartVault = loadOrCreateSmartVault(event.address)
+  let smartVault = loadOrCreateSmartVault(event)
   smartVault.priceOracle = event.params.priceOracle.toHexString()
   smartVault.save()
 }
 
 export function handlePriceFeedSet(event: PriceFeedSet): void {
-  let smartVault = loadOrCreateSmartVault(event.address)
+  let smartVault = loadOrCreateSmartVault(event)
   let feedId = smartVault.id + '/feeds/' + event.params.base.toHexString() + '/' + event.params.quote.toHexString()
   let feed = new PriceFeed(feedId)
   feed.feed = event.params.feed.toHexString()
@@ -394,25 +370,25 @@ export function handlePriceFeedSet(event: PriceFeedSet): void {
 }
 
 export function handleSwapConnectorSet(event: SwapConnectorSet): void {
-  let smartVault = loadOrCreateSmartVault(event.address)
+  let smartVault = loadOrCreateSmartVault(event)
   smartVault.swapConnector = event.params.swapConnector.toHexString()
   smartVault.save()
 }
 
 export function handleBridgeConnectorSet(event: BridgeConnectorSet): void {
-  let smartVault = loadOrCreateSmartVault(event.address)
+  let smartVault = loadOrCreateSmartVault(event)
   smartVault.bridgeConnector = event.params.bridgeConnector.toHexString()
   smartVault.save()
 }
 
 export function handleFeeCollectorSet(event: FeeCollectorSet): void {
-  let smartVault = loadOrCreateSmartVault(event.address)
+  let smartVault = loadOrCreateSmartVault(event)
   smartVault.feeCollector = event.params.feeCollector.toHexString()
   smartVault.save()
 }
 
 export function handlePerformanceFeeSet(event: PerformanceFeeSet): void {
-  let smartVault = loadOrCreateSmartVault(event.address)
+  let smartVault = loadOrCreateSmartVault(event)
   let performanceFeeId = smartVault.id + '/performance-fee'
   let performanceFee = FeeConfig.load(performanceFeeId)
 
@@ -432,7 +408,7 @@ export function handlePerformanceFeeSet(event: PerformanceFeeSet): void {
 }
 
 export function handleWithdrawFeeSet(event: WithdrawFeeSet): void {
-  let smartVault = loadOrCreateSmartVault(event.address)
+  let smartVault = loadOrCreateSmartVault(event)
   let withdrawFeeId = smartVault.id + '/withdraw-fee'
   let withdrawFee = FeeConfig.load(withdrawFeeId)
 
@@ -452,7 +428,7 @@ export function handleWithdrawFeeSet(event: WithdrawFeeSet): void {
 }
 
 export function handleSwapFeeSet(event: SwapFeeSet): void {
-  let smartVault = loadOrCreateSmartVault(event.address)
+  let smartVault = loadOrCreateSmartVault(event)
   let swapFeeId = smartVault.id + '/swap-fee'
   let swapFee = FeeConfig.load(swapFeeId)
 
@@ -472,7 +448,7 @@ export function handleSwapFeeSet(event: SwapFeeSet): void {
 }
 
 export function handleBridgeFeeSet(event: BridgeFeeSet): void {
-  let smartVault = loadOrCreateSmartVault(event.address)
+  let smartVault = loadOrCreateSmartVault(event)
   let bridgeFeeId = smartVault.id + '/bridge-fee'
   let bridgeFee = FeeConfig.load(bridgeFeeId)
 
@@ -563,8 +539,8 @@ function getBridgeFeePct(address: Address): BigInt {
   return BigInt.zero()
 }
 
-export function loadOrCreateSmartVault(address: Address): SmartVault {
-  let id = address.toHexString()
+export function loadOrCreateSmartVault(event: ethereum.Event): SmartVault {
+  let id = getSmartVaultId(event)
   let smartVault = SmartVault.load(id)
 
   if (smartVault === null) {
@@ -574,7 +550,7 @@ export function loadOrCreateSmartVault(address: Address): SmartVault {
     smartVault.swapConnector = ZERO_ADDRESS.toHexString()
     smartVault.bridgeConnector = ZERO_ADDRESS.toHexString()
     smartVault.feeCollector = ZERO_ADDRESS.toHexString()
-    smartVault.wrappedNativeToken = loadOrCreateERC20(getWrappedNativeToken(address)).id
+    smartVault.wrappedNativeToken = loadOrCreateERC20(getWrappedNativeToken(event.address)).id
     smartVault.totalValueManaged = BigInt.zero()
     smartVault.totalFeesUsd = BigInt.zero()
     smartVault.totalGasRefundsUsd = BigInt.zero()
@@ -585,82 +561,20 @@ export function loadOrCreateSmartVault(address: Address): SmartVault {
   return smartVault
 }
 
-function loadOrCreateBalance(smartVault: SmartVault, token: ERC20): Balance {
-  let id = smartVault.id + '/balances/' + token.id
-  let balance = Balance.load(id)
-
-  if (balance === null) {
-    balance = new Balance(id)
-    balance.smartVault = smartVault.id
-    balance.token = token.id
-    balance.amount = BigInt.zero()
-    balance.save()
-  }
-
-  return balance
-}
-
-function createMovementIn(
-  event: ethereum.Event,
-  index: number,
-  execution: PrimitiveExecution,
-  token: ERC20,
-  amount: BigInt
-): void {
-  createMovement('In', event, index, execution, token, amount)
-
-  let smartVault = loadOrCreateSmartVault(event.address)
-  let balance = loadOrCreateBalance(smartVault, token)
-  balance.amount = balance.amount.minus(amount)
-  balance.save()
-}
-
-function createMovementOut(
-  event: ethereum.Event,
-  index: number,
-  execution: PrimitiveExecution,
-  token: ERC20,
-  amount: BigInt
-): void {
-  createMovement('Out', event, index, execution, token, amount)
-
-  let smartVault = loadOrCreateSmartVault(event.address)
-  let balance = loadOrCreateBalance(smartVault, token)
-  balance.amount = balance.amount.plus(amount)
-  balance.save()
-}
-
-function createMovement(
-  type: string,
-  event: ethereum.Event,
-  index: number,
-  execution: PrimitiveExecution,
-  token: ERC20,
-  amount: BigInt
-): void {
-  let smartVault = loadOrCreateSmartVault(event.address)
-  let movementId = smartVault.id + '/movements/' + getTransactionId(event) + '/' + index.toString()
-  let movement = new Movement(movementId)
-  movement.type = type
-  movement.smartVault = smartVault.id
-  movement.token = token.id
-  movement.amount = amount
-  movement.primitiveExecution = execution.id
-  movement.save()
-}
-
-function trackTransactionCost(event: ethereum.Event, smartVault: SmartVault, relayed: boolean): TransactionCost {
-  let id = event.transaction.hash.toHexString()
-  let transaction = TransactionCost.load(id)
+function loadOrCreateTransaction(event: ethereum.Event): Transaction {
+  let id = getTransactionId(event)
+  let transaction = Transaction.load(id)
 
   if (transaction == null) {
-    transaction = new TransactionCost(id)
-    transaction.smartVault = smartVault.id
+    transaction = new Transaction(id)
+    transaction.smartVault = getSmartVaultId(event)
+    transaction.sender = event.transaction.from.toHexString()
+    transaction.target = event.transaction.to
     transaction.gasUsed = BigInt.zero()
     transaction.gasPrice = BigInt.zero()
     transaction.costEth = BigInt.zero()
     transaction.costUsd = BigInt.zero()
-    transaction.relayer = (relayed ? event.transaction.from : ZERO_ADDRESS).toHexString()
+    transaction.relayer = ZERO_ADDRESS.toHexString()
   }
 
   if (transaction.gasUsed.isZero()) transaction.gasUsed = event.receipt!.gasUsed
@@ -670,6 +584,49 @@ function trackTransactionCost(event: ethereum.Event, smartVault: SmartVault, rel
   transaction.save()
 
   return transaction
+}
+
+function loadOrCreateBalance(event: ethereum.Event, token: ERC20): Balance {
+  let id = getBalanceId(event, token)
+  let balance = Balance.load(id)
+
+  if (balance === null) {
+    balance = new Balance(id)
+    balance.smartVault = getSmartVaultId(event)
+    balance.token = token.id
+    balance.amount = BigInt.zero()
+    balance.save()
+  }
+
+  return balance
+}
+
+function createMovementIn(event: ethereum.Event, index: number, token: ERC20, amount: BigInt): void {
+  createMovement('In', event, index, token, amount)
+
+  let balance = loadOrCreateBalance(event, token)
+  balance.amount = balance.amount.minus(amount)
+  balance.save()
+}
+
+function createMovementOut(event: ethereum.Event, index: number, token: ERC20, amount: BigInt): void {
+  createMovement('Out', event, index, token, amount)
+
+  let balance = loadOrCreateBalance(event, token)
+  balance.amount = balance.amount.plus(amount)
+  balance.save()
+}
+
+function createMovement(type: string, event: ethereum.Event, index: number, token: ERC20, amount: BigInt): void {
+  let movementId = getMovementId(event, index)
+  let movement = new Movement(movementId)
+  movement.type = type
+  movement.smartVault = getSmartVaultId(event)
+  movement.transaction = getTransactionId(event)
+  movement.primitiveExecution = getExecutionId(event)
+  movement.token = token.id
+  movement.amount = amount
+  movement.save()
 }
 
 function trackGlobalFees(feeUsd: BigInt): void {
@@ -695,6 +652,26 @@ function trackGlobalStats(valueManagedUsd: BigInt, feeUsd: BigInt, gasRefundUsd:
   stats.save()
 }
 
+function getSmartVaultId(event: ethereum.Event): string {
+  return event.address.toHexString()
+}
+
+function getBalanceId(event: ethereum.Event, token: ERC20): string {
+  return getSmartVaultId(event) + '/balances/' + token.id
+}
+
 function getTransactionId(event: ethereum.Event): string {
-  return event.transaction.hash.toHexString() + '/' + event.transactionLogIndex.toString()
+  return getSmartVaultId(event) + '/transactions/' + event.transaction.hash.toHexString()
+}
+
+function getExecutionId(event: ethereum.Event): string {
+  return getTransactionId(event) + '/executions/' + event.transactionLogIndex.toString()
+}
+
+function getMovementId(event: ethereum.Event, index: number): string {
+  return getExecutionId(event) + '/movements/' + index.toString()
+}
+
+function getFeeId(event: ethereum.Event, index: number): string {
+  return getExecutionId(event) + '/fees/' + index.toString()
 }
