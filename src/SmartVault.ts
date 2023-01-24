@@ -573,6 +573,7 @@ function loadOrCreateTransaction(event: ethereum.Event): Transaction {
     transaction.smartVault = getSmartVaultId(event)
     transaction.sender = event.transaction.from.toHexString()
     transaction.target = event.transaction.to
+    transaction.executedAt = event.block.timestamp
     transaction.gasUsed = BigInt.zero()
     transaction.gasPrice = BigInt.zero()
     transaction.costEth = BigInt.zero()
