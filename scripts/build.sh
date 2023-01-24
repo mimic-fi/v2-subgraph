@@ -3,30 +3,60 @@
 # Exit script as soon as a command fails.
 set -o errexit
 
-# Mainnet
-old_registry_mainnet=0x53D627B1a2993139b32d5dF209A94498d691f21A
-smart_vaults_factory_mainnet=0x8373c68629191EF10f654CE8e32bbfe3c7A1D743
-block_mainnet=15950104
+# Arbitrum
+old_registry_arbitrum=0x53D627B1a2993139b32d5dF209A94498d691f21A
+smart_vaults_factory_arbitrum=0x8373c68629191EF10f654CE8e32bbfe3c7A1D743
+block_arbitrum=54001515
 
-# Polygon
-old_registry_matic=0x53D627B1a2993139b32d5dF209A94498d691f21A
-smart_vaults_factory_matic=0x8373c68629191EF10f654CE8e32bbfe3c7A1D743
-block_matic=
+# Avalanche
+old_registry_avalanche=0x53D627B1a2993139b32d5dF209A94498d691f21A
+smart_vaults_factory_avalanche=0x8373c68629191EF10f654CE8e32bbfe3c7A1D743
+block_avalanche=25185623
+
+# BSC
+old_registry_bsc=0x53D627B1a2993139b32d5dF209A94498d691f21A
+smart_vaults_factory_bsc=0x8373c68629191EF10f654CE8e32bbfe3c7A1D743
+block_bsc=24951117
+
+# Fantom
+old_registry_fantom=0x53D627B1a2993139b32d5dF209A94498d691f21A
+smart_vaults_factory_fantom=0x8373c68629191EF10f654CE8e32bbfe3c7A1D743
+block_fantom=54077553
+
+# Gnosis
+old_registry_gnosis=0x53D627B1a2993139b32d5dF209A94498d691f21A
+smart_vaults_factory_gnosis=0x8373c68629191EF10f654CE8e32bbfe3c7A1D743
+block_gnosis=26035218
 
 # Goerli
 old_registry_goerli=0x53D627B1a2993139b32d5dF209A94498d691f21A
 smart_vaults_factory_goerli=0x8373c68629191EF10f654CE8e32bbfe3c7A1D743
 block_goerli=7936627
 
+# Mainnet
+old_registry_mainnet=0x53D627B1a2993139b32d5dF209A94498d691f21A
+smart_vaults_factory_mainnet=0x8373c68629191EF10f654CE8e32bbfe3c7A1D743
+block_mainnet=15950104
+
 # Mumbai
 old_registry_mumbai=0x53D627B1a2993139b32d5dF209A94498d691f21A
 smart_vaults_factory_mumbai=0x8373c68629191EF10f654CE8e32bbfe3c7A1D743
 block_mumbai=29929062
 
+# Optimism
+old_registry_optimism=0x53D627B1a2993139b32d5dF209A94498d691f21A
+smart_vaults_factory_optimism=0x8373c68629191EF10f654CE8e32bbfe3c7A1D743
+block_optimism=69049113
+
+# Polygon
+old_registry_matic=0x53D627B1a2993139b32d5dF209A94498d691f21A
+smart_vaults_factory_matic=0x8373c68629191EF10f654CE8e32bbfe3c7A1D743
+block_matic=38251690
+
 # Validate network
-networks=(mainnet matic goerli mumbai)
+networks=(arbitrum avalanche bsc fantom gnosis goerli mainnet matic mumbai optimism)
 if [[ -z $NETWORK || ! " ${networks[@]} " =~ " ${NETWORK} " ]]; then
-  echo 'Please make sure the network provided is either mainnet, matic, mumbai or goerli.'
+  echo 'Please make sure the network provided is either: arbitrum, avalanche, bsc, fantom, gnosis, goerli, mainnet, matic, mumbai, or optimism.'
   exit 1
 fi
 
