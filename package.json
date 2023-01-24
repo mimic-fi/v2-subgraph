@@ -12,7 +12,7 @@
     "build:gnosis": "NETWORK=gnosis ./scripts/build.sh",
     "build:goerli": "NETWORK=goerli ./scripts/build.sh",
     "build:mainnet": "NETWORK=mainnet ./scripts/build.sh",
-    "build:matic": "NETWORK=matic ./scripts/build.sh",
+    "build:polygon": "NETWORK=polygon ./scripts/build.sh",
     "build:mumbai": "NETWORK=mumbai ./scripts/build.sh",
     "build:optimism": "NETWORK=optimism ./scripts/build.sh",
     "deploy:arbitrum": "NETWORK=arbitrum ./scripts/deploy.sh",
@@ -22,7 +22,7 @@
     "deploy:gnosis": "NETWORK=gnosis ./scripts/deploy.sh",
     "deploy:goerli": "NETWORK=goerli ./scripts/deploy.sh",
     "deploy:mainnet": "NETWORK=mainnet ./scripts/deploy.sh",
-    "deploy:matic": "NETWORK=matic ./scripts/deploy.sh",
+    "deploy:polygon": "NETWORK=polygon ./scripts/deploy.sh",
     "deploy:mumbai": "NETWORK=mumbai ./scripts/deploy.sh",
     "deploy:optimism": "NETWORK=optimism ./scripts/deploy.sh"
   },

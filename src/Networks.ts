@@ -17,7 +17,7 @@ export function isGoerli(): boolean {
 }
 
 export function isArbitrum(): boolean {
-  return dataSource.network() == 'arbitrum'
+  return dataSource.network() == 'arbitrum' || dataSource.network() == 'arbitrum-one'
 }
 
 export function isOptimism(): boolean {

@@ -49,20 +49,24 @@ smart_vaults_factory_optimism=0x8373c68629191EF10f654CE8e32bbfe3c7A1D743
 block_optimism=69049113
 
 # Polygon
-old_registry_matic=0x53D627B1a2993139b32d5dF209A94498d691f21A
-smart_vaults_factory_matic=0x8373c68629191EF10f654CE8e32bbfe3c7A1D743
-block_matic=38251690
+old_registry_polygon=0x53D627B1a2993139b32d5dF209A94498d691f21A
+smart_vaults_factory_polygon=0x8373c68629191EF10f654CE8e32bbfe3c7A1D743
+block_polygon=38251690
 
 # Validate network
-networks=(arbitrum avalanche bsc fantom gnosis goerli mainnet matic mumbai optimism)
+networks=(arbitrum avalanche bsc fantom gnosis goerli mainnet polygon mumbai optimism)
 if [[ -z $NETWORK || ! " ${networks[@]} " =~ " ${NETWORK} " ]]; then
-  echo 'Please make sure the network provided is either: arbitrum, avalanche, bsc, fantom, gnosis, goerli, mainnet, matic, mumbai, or optimism.'
+  echo 'Please make sure the network provided is either: arbitrum, avalanche, bsc, fantom, gnosis, goerli, mainnet, polygon, mumbai, or optimism.'
   exit 1
 fi
 
 # Use mainnet network in case of local deployment
 if [[ "$NETWORK" = "localhost" ]]; then
   ENV='mainnet'
+elif [[ "$NETWORK" = "polygon" ]]; then
+  ENV='matic'
+elif [[ "$NETWORK" = "arbitrum" ]]; then
+  ENV='arbitrum-one'
 else
   ENV=${NETWORK}
 fi
