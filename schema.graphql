@@ -1,20 +1,21 @@
 type SmartVault implements Authorizer @entity {
   id: ID!
-  balances: [Balance!] @derivedFrom(field: "smartVault")
-  priceFeeds: [PriceFeed!] @derivedFrom(field: "smartVault")
+  wrappedNativeToken: ERC20!
   priceOracle: String!
   swapConnector: String!
   bridgeConnector: String!
   strategies: [String!]!
   feeCollector: String!
-  wrappedNativeToken: ERC20!
-  swapFee: FeeConfig @derivedFrom(field: "smartVault")
-  withdrawFee: FeeConfig @derivedFrom(field: "smartVault")
-  performanceFee: FeeConfig @derivedFrom(field: "smartVault")
+  bridgeFee: FeeConfig
+  swapFee: FeeConfig
+  withdrawFee: FeeConfig
+  performanceFee: FeeConfig
   totalValueManaged: BigInt!
   totalFeesUsd: BigInt!
   totalGasRefundsUsd: BigInt!
   totalRelayedCostUsd: BigInt!
+  balances: [Balance!] @derivedFrom(field: "smartVault")
+  priceFeeds: [PriceFeed!] @derivedFrom(field: "smartVault")
   fees: [Fee!] @derivedFrom(field: "smartVault")
   transactions: [Transaction!] @derivedFrom(field: "smartVault")
   primitiveExecutions: [PrimitiveExecution!] @derivedFrom(field: "smartVault")
@@ -135,6 +136,7 @@ type Grantee @entity {
 
 type Stats @entity {
   id: ID!
+  totalValueManaged: BigInt!
   totalFeesUsd: BigInt!
   totalGasRefundsUsd: BigInt!
   totalRelayedCostUsd: BigInt!
