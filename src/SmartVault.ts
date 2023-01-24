@@ -40,7 +40,8 @@ import {
   FeeCollectorSet
 } from '../types/templates/SmartVault/SmartVault'
 
-import { rateInUsd, WETH } from './UniswapV2'
+import { getWeth } from './Tokens'
+import { rateInUsd } from './UniswapV3'
 import { loadOrCreateERC20, loadOrCreateNativeToken } from './ERC20'
 import { processAuthorizedEvent, processUnauthorizedEvent } from './Permissions'
 import { getCurrentChainId } from './Networks'
@@ -130,7 +131,7 @@ export function handleWithdraw(event: Withdraw): void {
   smartVault.totalRelayedCostUsd = smartVault.totalRelayedCostUsd.plus(relayedCostUsd)
   smartVault.save()
 
-  trackGlobalStats(feeUsd, gasRefundUsd, relayedCostUsd)
+  trackGlobalStats(amountUsd, feeUsd, gasRefundUsd, relayedCostUsd)
 }
 
 export function handleWrap(event: Wrap): void {
@@ -404,6 +405,9 @@ export function handlePerformanceFeeSet(event: PerformanceFeeSet): void {
   performanceFee.token = loadOrCreateERC20(event.params.token).id
   performanceFee.period = event.params.period
   performanceFee.save()
+
+  smartVault.performanceFee = performanceFee.id
+  smartVault.save()
 }
 
 export function handleWithdrawFeeSet(event: WithdrawFeeSet): void {
@@ -421,6 +425,9 @@ export function handleWithdrawFeeSet(event: WithdrawFeeSet): void {
   withdrawFee.token = loadOrCreateERC20(event.params.token).id
   withdrawFee.period = event.params.period
   withdrawFee.save()
+
+  smartVault.withdrawFee = withdrawFee.id
+  smartVault.save()
 }
 
 export function handleSwapFeeSet(event: SwapFeeSet): void {
@@ -438,6 +445,9 @@ export function handleSwapFeeSet(event: SwapFeeSet): void {
   swapFee.token = loadOrCreateERC20(event.params.token).id
   swapFee.period = event.params.period
   swapFee.save()
+
+  smartVault.swapFee = swapFee.id
+  smartVault.save()
 }
 
 export function handleBridgeFeeSet(event: BridgeFeeSet): void {
@@ -455,6 +465,9 @@ export function handleBridgeFeeSet(event: BridgeFeeSet): void {
   bridgeFee.token = loadOrCreateERC20(event.params.token).id
   bridgeFee.period = event.params.period
   bridgeFee.save()
+
+  smartVault.bridgeFee = bridgeFee.id
+  smartVault.save()
 }
 
 export function getWrappedNativeToken(address: Address): Address {
@@ -570,7 +583,7 @@ function loadOrCreateTransaction(event: ethereum.Event): Transaction {
   if (transaction.gasUsed.isZero()) transaction.gasUsed = event.receipt!.gasUsed
   if (transaction.gasPrice.isZero()) transaction.gasPrice = event.transaction.gasPrice
   if (transaction.costEth.isZero()) transaction.costEth = transaction.gasPrice.times(transaction.gasUsed)
-  if (transaction.costUsd.isZero()) transaction.costUsd = rateInUsd(WETH, transaction.costEth)
+  if (transaction.costUsd.isZero()) transaction.costUsd = rateInUsd(getWeth(), transaction.costEth)
   transaction.save()
 
   return transaction
@@ -622,20 +635,22 @@ function createMovement(type: string, event: ethereum.Event, index: number, toke
 }
 
 function trackGlobalFees(feeUsd: BigInt): void {
-  trackGlobalStats(feeUsd, BigInt.zero(), BigInt.zero())
+  trackGlobalStats(BigInt.zero(), feeUsd, BigInt.zero(), BigInt.zero())
 }
 
-function trackGlobalStats(feeUsd: BigInt, gasRefundUsd: BigInt, relayedCostUsd: BigInt): void {
+function trackGlobalStats(valueManagedUsd: BigInt, feeUsd: BigInt, gasRefundUsd: BigInt, relayedCostUsd: BigInt): void {
   let stats = Stats.load('MIMIC_STATS')
 
   if (stats == null) {
     stats = new Stats('MIMIC_STATS')
+    stats.totalValueManaged = BigInt.zero()
     stats.totalFeesUsd = BigInt.zero()
     stats.totalGasRefundsUsd = BigInt.zero()
     stats.totalRelayedCostUsd = BigInt.zero()
     stats.save()
   }
 
+  stats.totalValueManaged = stats.totalValueManaged.plus(valueManagedUsd)
   stats.totalFeesUsd = stats.totalFeesUsd.plus(feeUsd)
   stats.totalGasRefundsUsd = stats.totalGasRefundsUsd.plus(gasRefundUsd)
   stats.totalRelayedCostUsd = stats.totalRelayedCostUsd.plus(relayedCostUsd)

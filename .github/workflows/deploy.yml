@@ -6,41 +6,172 @@ on:
       - master
 
 jobs:
-  deploy:
+  deploy-mainnet:
+    name: Deploy Mainnet
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      - name: Install node
-        uses: actions/setup-node@v3
-        with:
-          node-version: 16
-          cache: yarn
-      - name: Install dependencies
-        run: yarn --prefer-offline
-      - name: Deploy Goerli
-        env:
-          GRAPH_KEY: ${{ secrets.GRAPH_KEY }}
-        run: yarn deploy:goerli
-      - name: Deploy Mumbai
-        env:
-          GRAPH_KEY: ${{ secrets.GRAPH_KEY }}
-        run: yarn deploy:mumbai
+      - name: Set up environment
+        uses: ./.github/actions/setup
       - name: Deploy Mainnet
         env:
           GRAPH_KEY: ${{ secrets.GRAPH_KEY }}
         run: yarn deploy:mainnet
-      - name: Build failure
-        uses: rjstone/discord-webhook-notify@v1
-        if: failure()
+      - name: Notify discord
+        uses: ./.github/actions/notify-discord
         with:
-          severity: error
-          details: Build failed!
-          webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
-      - name: Build cancelled
-        uses: rjstone/discord-webhook-notify@v1
-        if: cancelled()
+          discord-webhook: ${{ secrets.DISCORD_WEBHOOK }}
+
+  deploy-polygon:
+    name: Deploy Polygon
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Set up environment
+        uses: ./.github/actions/setup
+      - name: Deploy Polygon
+        env:
+          GRAPH_KEY: ${{ secrets.GRAPH_KEY }}
+        run: yarn deploy:polygon
+      - name: Notify discord
+        uses: ./.github/actions/notify-discord
         with:
-          severity: warn
-          details: Build cancelled!
-          webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
+          discord-webhook: ${{ secrets.DISCORD_WEBHOOK }}
+
+  deploy-optimism:
+    name: Deploy Optimism
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Set up environment
+        uses: ./.github/actions/setup
+      - name: Deploy Optimism
+        env:
+          GRAPH_KEY: ${{ secrets.GRAPH_KEY }}
+        run: yarn deploy:optimism
+      - name: Notify discord
+        uses: ./.github/actions/notify-discord
+        with:
+          discord-webhook: ${{ secrets.DISCORD_WEBHOOK }}
+
+  deploy-arbitrum:
+    name: Deploy Arbitrum
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Set up environment
+        uses: ./.github/actions/setup
+      - name: Deploy Arbitrum
+        env:
+          GRAPH_KEY: ${{ secrets.GRAPH_KEY }}
+        run: yarn deploy:arbitrum
+      - name: Notify discord
+        uses: ./.github/actions/notify-discord
+        with:
+          discord-webhook: ${{ secrets.DISCORD_WEBHOOK }}
+
+  deploy-gnosis:
+    name: Deploy Gnosis
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Set up environment
+        uses: ./.github/actions/setup
+      - name: Deploy Gnosis
+        env:
+          GRAPH_KEY: ${{ secrets.GRAPH_KEY }}
+        run: yarn deploy:gnosis
+      - name: Notify discord
+        uses: ./.github/actions/notify-discord
+        with:
+          discord-webhook: ${{ secrets.DISCORD_WEBHOOK }}
+
+  deploy-avalanche:
+    name: Deploy Avalanche
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Set up environment
+        uses: ./.github/actions/setup
+      - name: Deploy Avalanche
+        env:
+          GRAPH_KEY: ${{ secrets.GRAPH_KEY }}
+        run: yarn deploy:avalanche
+      - name: Notify discord
+        uses: ./.github/actions/notify-discord
+        with:
+          discord-webhook: ${{ secrets.DISCORD_WEBHOOK }}
+
+  deploy-fantom:
+    name: Deploy Fantom
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Set up environment
+        uses: ./.github/actions/setup
+      - name: Deploy Fantom
+        env:
+          GRAPH_KEY: ${{ secrets.GRAPH_KEY }}
+        run: yarn deploy:fantom
+      - name: Notify discord
+        uses: ./.github/actions/notify-discord
+        with:
+          discord-webhook: ${{ secrets.DISCORD_WEBHOOK }}
+
+  deploy-bsc:
+    name: Deploy BSC
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Set up environment
+        uses: ./.github/actions/setup
+      - name: Deploy BSC
+        env:
+          GRAPH_KEY: ${{ secrets.GRAPH_KEY }}
+        run: yarn deploy:bsc
+      - name: Notify discord
+        uses: ./.github/actions/notify-discord
+        with:
+          discord-webhook: ${{ secrets.DISCORD_WEBHOOK }}
+
+  deploy-goerli:
+    name: Deploy Goerli
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Set up environment
+        uses: ./.github/actions/setup
+      - name: Deploy Goerli
+        env:
+          GRAPH_KEY: ${{ secrets.GRAPH_KEY }}
+        run: yarn deploy:goerli
+      - name: Notify discord
+        uses: ./.github/actions/notify-discord
+        with:
+          discord-webhook: ${{ secrets.DISCORD_WEBHOOK }}
+
+  deploy-mumbai:
+    name: Deploy Mumbai
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Set up environment
+        uses: ./.github/actions/setup
+      - name: Deploy Mumbai
+        env:
+          GRAPH_KEY: ${{ secrets.GRAPH_KEY }}
+        run: yarn deploy:mumbai
+      - name: Notify discord
+        uses: ./.github/actions/notify-discord
+        with:
+          discord-webhook: ${{ secrets.DISCORD_WEBHOOK }}
