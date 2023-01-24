@@ -571,6 +571,7 @@ function loadOrCreateTransaction(event: ethereum.Event): Transaction {
   if (transaction == null) {
     transaction = new Transaction(id)
     transaction.smartVault = getSmartVaultId(event)
+    transaction.hash = event.transaction.hash.toHexString()
     transaction.sender = event.transaction.from.toHexString()
     transaction.target = event.transaction.to
     transaction.executedAt = event.block.timestamp

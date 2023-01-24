@@ -25,6 +25,7 @@ type SmartVault implements Authorizer @entity {
 type Transaction @entity {
   id: ID!
   smartVault: SmartVault!
+  hash: String!
   sender: String!
   target: Bytes
   gasUsed: BigInt!
