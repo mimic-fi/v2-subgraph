@@ -1,25 +1,8 @@
-import { Address, dataSource, log } from '@graphprotocol/graph-ts'
+import { Address, log } from '@graphprotocol/graph-ts'
 
 import { ERC20 as ERC20Entity } from '../types/schema'
 import { ERC20 as ERC20Contract } from '../types/templates/SmartVault/ERC20'
-
-const NATIVE_TOKEN_ADDRESS = Address.fromString('0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee')
-
-function getNativeTokenSymbol(): string {
-  let network = dataSource.network()
-  if (network == 'goerli') return 'ETH'
-  if (network == 'mainnet') return 'ETH'
-  if (network == 'polygon') return 'MATIC'
-  return 'Unknown'
-}
-
-function getNativeTokenName(): string {
-  let network = dataSource.network()
-  if (network == 'goerli') return 'Ether'
-  if (network == 'mainnet') return 'Ether'
-  if (network == 'polygon') return 'Matic'
-  return 'Unknown'
-}
+import { getNativeTokenName, getNativeTokenSymbol, NATIVE_TOKEN_ADDRESS } from './Tokens'
 
 export function loadOrCreateNativeToken(): ERC20Entity {
   let id = NATIVE_TOKEN_ADDRESS.toHexString()

@@ -16,7 +16,8 @@
   },
   "dependencies": {
     "@mimic-fi/v2-smart-vault": "0.1.0-rc.2",
-    "@uniswap/v2-core": "^1.0.1"
+    "@uniswap/v3-core": "^1.0.1",
+    "@uniswap/v3-periphery": "^1.4.3"
   },
   "devDependencies": {
     "@graphprotocol/graph-cli": "^0.37.2",
