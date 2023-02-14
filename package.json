@@ -27,7 +27,7 @@
     "deploy:optimism": "NETWORK=optimism ./scripts/deploy.sh"
   },
   "dependencies": {
-    "@mimic-fi/v2-smart-vault": "0.1.0-rc.2",
+    "@mimic-fi/v2-smart-vault": "0.1.0",
     "@uniswap/v3-core": "^1.0.1",
     "@uniswap/v3-periphery": "^1.4.3"
   },
