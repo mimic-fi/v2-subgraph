@@ -69,11 +69,15 @@ templates:
           file: ./node_modules/@mimic-fi/v2-smart-vault/artifacts/contracts/ISmartVault.sol/ISmartVault.json
         - name: ERC20
           file: ./node_modules/@uniswap/v3-periphery/artifacts/contracts/interfaces/IERC20Metadata.sol/IERC20Metadata.json
-        - name: UniswapPool
+        - name: UniswapPairV2
+          file: ./node_modules/@uniswap/v2-core/build/IUniswapV2Pair.json
+        - name: UniswapFactoryV2
+          file: ./node_modules/@uniswap/v2-core/build/IUniswapV2Factory.json
+        - name: UniswapPoolV3
           file: ./node_modules/@uniswap/v3-core/artifacts/contracts/interfaces/pool/IUniswapV3PoolState.sol/IUniswapV3PoolState.json
-        - name: UniswapFactory
+        - name: UniswapFactoryV3
           file: ./node_modules/@uniswap/v3-core/artifacts/contracts/interfaces/IUniswapV3Factory.sol/IUniswapV3Factory.json
-        - name: UniswapRouter
+        - name: UniswapRouterV3
           file: ./node_modules/@uniswap/v3-periphery/artifacts/contracts/interfaces/IPeripheryImmutableState.sol/IPeripheryImmutableState.json
       eventHandlers:
         - event: Call(indexed address,bytes,uint256,bytes,bytes)

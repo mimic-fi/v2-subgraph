@@ -40,7 +40,7 @@ import {
   FeeCollectorSet
 } from '../types/templates/SmartVault/SmartVault'
 
-import { rateInUsd } from './UniswapV3'
+import { rateInUsd } from './rates'
 import { loadOrCreateERC20, loadOrCreateNativeToken } from './ERC20'
 import { processAuthorizedEvent, processUnauthorizedEvent } from './Permissions'
 import { getCurrentChainId } from './Networks'

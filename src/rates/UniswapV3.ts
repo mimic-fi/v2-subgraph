@@ -1,11 +1,10 @@
 import { Address, BigInt, log } from '@graphprotocol/graph-ts'
 
-import { UniswapPool } from '../types/templates/SmartVault/UniswapPool'
-import { UniswapRouter } from '../types/templates/SmartVault/UniswapRouter'
-import { UniswapFactory } from '../types/templates/SmartVault/UniswapFactory'
+import { UniswapPoolV3 as UniswapPool } from '../../types/templates/SmartVault/UniswapPoolV3'
+import { UniswapRouterV3 as UniswapRouter } from '../../types/templates/SmartVault/UniswapRouterV3'
+import { UniswapFactoryV3 as UniswapFactory } from '../../types/templates/SmartVault/UniswapFactoryV3'
 
-import { getUsdc, getWeth } from './Tokens'
-import { isEthNetwork, isMaticNetwork } from './Networks'
+import { getUsdc, getWeth } from '../Tokens'
 
 const POW_2_192 = BigInt.fromI32(2).pow(192)
 const ZERO_ADDRESS = Address.fromString('0x0000000000000000000000000000000000000000')
@@ -13,8 +12,6 @@ const ZERO_ADDRESS = Address.fromString('0x0000000000000000000000000000000000000
 export const UNISWAP_V3_ROUTER = Address.fromString('0xE592427A0AEce92De3Edee1F18E0157C05861564')
 
 export function rateInUsd(token: Address, amount: BigInt): BigInt {
-  if (!isEthNetwork() && !isMaticNetwork()) return BigInt.zero()
-
   const USDC = getUsdc()
   const WETH = getWeth()
 
