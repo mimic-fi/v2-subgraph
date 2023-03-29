@@ -40,7 +40,6 @@ import {
   FeeCollectorSet
 } from '../types/templates/SmartVault/SmartVault'
 
-import { getWeth } from './Tokens'
 import { rateInUsd } from './rates'
 import { loadOrCreateERC20, loadOrCreateNativeToken } from './ERC20'
 import { processAuthorizedEvent, processUnauthorizedEvent } from './Permissions'
@@ -59,7 +58,7 @@ export function handleUnauthorized(event: Unauthorized): void {
 
 export function handleCall(event: Call): void {
   let smartVault = loadOrCreateSmartVault(event)
-  let transaction = loadOrCreateTransaction(event)
+  let transaction = loadOrCreateTransaction(smartVault, event)
 
   let executionId = getExecutionId(event)
   let execution = new PrimitiveExecution(executionId)
@@ -72,7 +71,7 @@ export function handleCall(event: Call): void {
 
 export function handleCollect(event: Collect): void {
   let smartVault = loadOrCreateSmartVault(event)
-  let transaction = loadOrCreateTransaction(event)
+  let transaction = loadOrCreateTransaction(smartVault, event)
 
   let executionId = getExecutionId(event)
   let execution = new PrimitiveExecution(executionId)
@@ -88,7 +87,7 @@ export function handleCollect(event: Collect): void {
 
 export function handleWithdraw(event: Withdraw): void {
   let smartVault = loadOrCreateSmartVault(event)
-  let transaction = loadOrCreateTransaction(event)
+  let transaction = loadOrCreateTransaction(smartVault, event)
 
   let executionId = getExecutionId(event)
   let execution = new PrimitiveExecution(executionId)
@@ -136,7 +135,7 @@ export function handleWithdraw(event: Withdraw): void {
 
 export function handleWrap(event: Wrap): void {
   let smartVault = loadOrCreateSmartVault(event)
-  let transaction = loadOrCreateTransaction(event)
+  let transaction = loadOrCreateTransaction(smartVault, event)
 
   let executionId = getExecutionId(event)
   let execution = new PrimitiveExecution(executionId)
@@ -155,7 +154,7 @@ export function handleWrap(event: Wrap): void {
 
 export function handleUnwrap(event: Unwrap): void {
   let smartVault = loadOrCreateSmartVault(event)
-  let transaction = loadOrCreateTransaction(event)
+  let transaction = loadOrCreateTransaction(smartVault, event)
 
   let executionId = getExecutionId(event)
   let execution = new PrimitiveExecution(executionId)
@@ -174,7 +173,7 @@ export function handleUnwrap(event: Unwrap): void {
 
 export function handleClaim(event: Claim): void {
   let smartVault = loadOrCreateSmartVault(event)
-  let transaction = loadOrCreateTransaction(event)
+  let transaction = loadOrCreateTransaction(smartVault, event)
 
   let executionId = getExecutionId(event)
   let execution = new PrimitiveExecution(executionId)
@@ -194,7 +193,7 @@ export function handleClaim(event: Claim): void {
 
 export function handleJoin(event: Join): void {
   let smartVault = loadOrCreateSmartVault(event)
-  let transaction = loadOrCreateTransaction(event)
+  let transaction = loadOrCreateTransaction(smartVault, event)
 
   let executionId = getExecutionId(event)
   let execution = new PrimitiveExecution(executionId)
@@ -223,7 +222,7 @@ export function handleJoin(event: Join): void {
 
 export function handleExit(event: Exit): void {
   let smartVault = loadOrCreateSmartVault(event)
-  let transaction = loadOrCreateTransaction(event)
+  let transaction = loadOrCreateTransaction(smartVault, event)
 
   let executionId = getExecutionId(event)
   let execution = new PrimitiveExecution(executionId)
@@ -271,7 +270,7 @@ export function handleExit(event: Exit): void {
 
 export function handleSwap(event: Swap): void {
   let smartVault = loadOrCreateSmartVault(event)
-  let transaction = loadOrCreateTransaction(event)
+  let transaction = loadOrCreateTransaction(smartVault, event)
 
   let executionId = getExecutionId(event)
   let execution = new PrimitiveExecution(executionId)
@@ -308,7 +307,7 @@ export function handleSwap(event: Swap): void {
 
 export function handleBridge(event: Bridge): void {
   let smartVault = loadOrCreateSmartVault(event)
-  let transaction = loadOrCreateTransaction(event)
+  let transaction = loadOrCreateTransaction(smartVault, event)
 
   let executionId = getExecutionId(event)
   let execution = new PrimitiveExecution(executionId)
@@ -564,7 +563,7 @@ export function loadOrCreateSmartVault(event: ethereum.Event): SmartVault {
   return smartVault
 }
 
-function loadOrCreateTransaction(event: ethereum.Event): Transaction {
+function loadOrCreateTransaction(smartVault: SmartVault, event: ethereum.Event): Transaction {
   let id = getTransactionId(event)
   let transaction = Transaction.load(id)
 
@@ -585,7 +584,8 @@ function loadOrCreateTransaction(event: ethereum.Event): Transaction {
   if (transaction.gasUsed.isZero()) transaction.gasUsed = event.receipt!.gasUsed
   if (transaction.gasPrice.isZero()) transaction.gasPrice = event.transaction.gasPrice
   if (transaction.costEth.isZero()) transaction.costEth = transaction.gasPrice.times(transaction.gasUsed)
-  if (transaction.costUsd.isZero()) transaction.costUsd = rateInUsd(getWeth(), transaction.costEth)
+  if (transaction.costUsd.isZero())
+    transaction.costUsd = rateInUsd(Address.fromString(smartVault.wrappedNativeToken), transaction.costEth)
   transaction.save()
 
   return transaction
