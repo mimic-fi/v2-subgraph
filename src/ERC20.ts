@@ -38,7 +38,7 @@ export function loadOrCreateERC20(address: Address): ERC20Entity {
   return erc20
 }
 
-function getERC20Decimals(address: Address): i32 {
+export function getERC20Decimals(address: Address): i32 {
   let erc20Contract = ERC20Contract.bind(address)
   let decimalsCall = erc20Contract.try_decimals()
 
@@ -50,7 +50,7 @@ function getERC20Decimals(address: Address): i32 {
   return 0
 }
 
-function getERC20Name(address: Address): string {
+export function getERC20Name(address: Address): string {
   let erc20Contract = ERC20Contract.bind(address)
   let nameCall = erc20Contract.try_name()
 
@@ -62,7 +62,7 @@ function getERC20Name(address: Address): string {
   return 'Unknown'
 }
 
-function getERC20Symbol(address: Address): string {
+export function getERC20Symbol(address: Address): string {
   let erc20Contract = ERC20Contract.bind(address)
   let symbolCall = erc20Contract.try_symbol()
 
