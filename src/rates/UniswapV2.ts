@@ -7,7 +7,7 @@ import { getUsdc, getWrappedNativeToken } from '../Tokens'
 
 const ZERO_ADDRESS = Address.fromString('0x0000000000000000000000000000000000000000')
 
-export function rateInUsd(token: Address, amount: BigInt, factoryAddress: Address): BigInt {
+export function rateInUsdc(token: Address, amount: BigInt, factoryAddress: Address): BigInt {
   const USDC = getUsdc()
   const wrappedNativeToken = getWrappedNativeToken()
   const factory = UniswapFactory.bind(factoryAddress)

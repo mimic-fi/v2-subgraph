@@ -11,7 +11,7 @@ const ZERO_ADDRESS = Address.fromString('0x0000000000000000000000000000000000000
 
 export const UNISWAP_V3_ROUTER = Address.fromString('0xE592427A0AEce92De3Edee1F18E0157C05861564')
 
-export function rateInUsd(token: Address, amount: BigInt): BigInt {
+export function rateInUsdc(token: Address, amount: BigInt): BigInt {
   const USDC = getUsdc()
   const wrappedNativeToken = getWrappedNativeToken()
 
