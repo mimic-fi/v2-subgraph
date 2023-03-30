@@ -30,7 +30,7 @@ type Transaction @entity {
   target: Bytes
   gasUsed: BigInt!
   gasPrice: BigInt!
-  costEth: BigInt!
+  costNative: BigInt!
   costUsd: BigInt!
   relayer: String!
   executedAt: BigInt!

@@ -3,24 +3,28 @@ import { Address, BigInt, log } from '@graphprotocol/graph-ts'
 import { UniswapPairV2 as UniswapPair } from '../../types/templates/SmartVault/UniswapPairV2'
 import { UniswapFactoryV2 as UniswapFactory } from '../../types/templates/SmartVault/UniswapFactoryV2'
 
-import { getUsdc, getWeth } from '../Tokens'
+import { getUsdc, getWrappedNativeToken } from '../Tokens'
 
 const ZERO_ADDRESS = Address.fromString('0x0000000000000000000000000000000000000000')
 
 export function rateInUsd(token: Address, amount: BigInt, factoryAddress: Address): BigInt {
   const USDC = getUsdc()
-  const WETH = getWeth()
+  const wrappedNativeToken = getWrappedNativeToken()
   const factory = UniswapFactory.bind(factoryAddress)
 
   if (token.equals(USDC)) return amount
-  if (token.equals(WETH)) return convert(factory, WETH, USDC, amount)
-  return convert(factory, WETH, USDC, convert(factory, token, WETH, amount))
+  if (token.equals(wrappedNativeToken)) return convert(factory, wrappedNativeToken, USDC, amount)
+  return convert(factory, wrappedNativeToken, USDC, convert(factory, token, wrappedNativeToken, amount))
 }
 
 function convert(factory: UniswapFactory, tokenIn: Address, tokenOut: Address, amountIn: BigInt): BigInt {
   if (amountIn.isZero()) return BigInt.zero()
+
   let poolAddress = getPool(factory, tokenIn, tokenOut)
-  if (poolAddress.equals(ZERO_ADDRESS)) return BigInt.zero()
+  if (poolAddress.equals(ZERO_ADDRESS)) {
+    log.warning('Could not find pool for tokens {} and {}', [tokenIn.toHexString(), tokenOut.toHexString()])
+    return BigInt.zero()
+  }
 
   let reserves = getReserves(poolAddress)
   let isTokenInLtTokenOut = tokenIn.toHexString().toLowerCase() < tokenOut.toHexString().toLowerCase()

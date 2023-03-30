@@ -4,7 +4,7 @@ import { UniswapPoolV3 as UniswapPool } from '../../types/templates/SmartVault/U
 import { UniswapRouterV3 as UniswapRouter } from '../../types/templates/SmartVault/UniswapRouterV3'
 import { UniswapFactoryV3 as UniswapFactory } from '../../types/templates/SmartVault/UniswapFactoryV3'
 
-import { getUsdc, getWeth } from '../Tokens'
+import { getUsdc, getWrappedNativeToken } from '../Tokens'
 
 const POW_2_192 = BigInt.fromI32(2).pow(192)
 const ZERO_ADDRESS = Address.fromString('0x0000000000000000000000000000000000000000')
@@ -13,18 +13,21 @@ export const UNISWAP_V3_ROUTER = Address.fromString('0xE592427A0AEce92De3Edee1F1
 
 export function rateInUsd(token: Address, amount: BigInt): BigInt {
   const USDC = getUsdc()
-  const WETH = getWeth()
+  const wrappedNativeToken = getWrappedNativeToken()
 
   if (token.equals(USDC)) return amount
-  if (token.equals(WETH)) return convert(WETH, USDC, amount)
-  return convert(WETH, USDC, convert(token, WETH, amount))
+  if (token.equals(wrappedNativeToken)) return convert(wrappedNativeToken, USDC, amount)
+  return convert(wrappedNativeToken, USDC, convert(token, wrappedNativeToken, amount))
 }
 
 function convert(tokenIn: Address, tokenOut: Address, amountIn: BigInt): BigInt {
   if (amountIn.isZero()) return BigInt.zero()
 
   let pool = getLowestFeePool(tokenIn, tokenOut)
-  if (pool.equals(ZERO_ADDRESS)) return BigInt.zero()
+  if (pool.equals(ZERO_ADDRESS)) {
+    log.warning('Could not find pool for tokens {} and {}', [tokenIn.toHexString(), tokenOut.toHexString()])
+    return BigInt.zero()
+  }
 
   // sqrtPriceX96 is the sqrt price between token0/token1 expressed in Q64.96
   // therefore, the price can be computed as: sqrtPriceX96 ** 2 / 2 ** 192
