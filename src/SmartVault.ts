@@ -44,6 +44,7 @@ import { rateInUsd } from './rates'
 import { loadOrCreateERC20, loadOrCreateNativeToken } from './ERC20'
 import { processAuthorizedEvent, processUnauthorizedEvent } from './Permissions'
 import { getCurrentChainId } from './Networks'
+import { getWrappedNativeToken } from './Tokens'
 
 const REDEEM_GAS_NOTE = '0x52454c41594552'
 const ZERO_ADDRESS = Address.fromString('0x0000000000000000000000000000000000000000')
@@ -469,7 +470,7 @@ export function handleBridgeFeeSet(event: BridgeFeeSet): void {
   smartVault.save()
 }
 
-export function getWrappedNativeToken(address: Address): Address {
+export function getSmartVaultWrappedNativeToken(address: Address): Address {
   let wallet = SmartVaultContract.bind(address)
   let wrappedNativeTokenCall = wallet.try_wrappedNativeToken()
 
@@ -552,7 +553,7 @@ export function loadOrCreateSmartVault(event: ethereum.Event): SmartVault {
     smartVault.swapConnector = ZERO_ADDRESS.toHexString()
     smartVault.bridgeConnector = ZERO_ADDRESS.toHexString()
     smartVault.feeCollector = ZERO_ADDRESS.toHexString()
-    smartVault.wrappedNativeToken = loadOrCreateERC20(getWrappedNativeToken(event.address)).id
+    smartVault.wrappedNativeToken = loadOrCreateERC20(getSmartVaultWrappedNativeToken(event.address)).id
     smartVault.totalValueManaged = BigInt.zero()
     smartVault.totalFeesUsd = BigInt.zero()
     smartVault.totalGasRefundsUsd = BigInt.zero()
@@ -576,16 +577,15 @@ function loadOrCreateTransaction(smartVault: SmartVault, event: ethereum.Event):
     transaction.executedAt = event.block.timestamp
     transaction.gasUsed = BigInt.zero()
     transaction.gasPrice = BigInt.zero()
-    transaction.costEth = BigInt.zero()
+    transaction.costNative = BigInt.zero()
     transaction.costUsd = BigInt.zero()
     transaction.relayer = ZERO_ADDRESS.toHexString()
   }
 
   if (transaction.gasUsed.isZero()) transaction.gasUsed = event.receipt!.gasUsed
   if (transaction.gasPrice.isZero()) transaction.gasPrice = event.transaction.gasPrice
-  if (transaction.costEth.isZero()) transaction.costEth = transaction.gasPrice.times(transaction.gasUsed)
-  if (transaction.costUsd.isZero())
-    transaction.costUsd = rateInUsd(Address.fromString(smartVault.wrappedNativeToken), transaction.costEth)
+  if (transaction.costNative.isZero()) transaction.costNative = transaction.gasPrice.times(transaction.gasUsed)
+  if (transaction.costUsd.isZero()) transaction.costUsd = rateInUsd(getWrappedNativeToken(), transaction.costNative)
   transaction.save()
 
   return transaction

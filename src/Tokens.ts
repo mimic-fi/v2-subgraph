@@ -19,8 +19,8 @@ export function getUsdc(): Address {
   return Address.fromString(getUsdcAddress())
 }
 
-export function getWeth(): Address {
-  return Address.fromString(getWethAddress())
+export function getWrappedNativeToken(): Address {
+  return Address.fromString(getWrappedNativeTokenAddress())
 }
 
 function getUsdcAddress(): string {
@@ -37,17 +37,17 @@ function getUsdcAddress(): string {
   return '0x0000000000000000000000000000000000000000'
 }
 
-function getWethAddress(): string {
-  if (isMainnet()) return '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'
-  if (isPolygon()) return '0x7ceb23fd6bc0add59e62ac25578270cff1b9f619'
-  if (isOptimism()) return '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1'
-  if (isArbitrum()) return '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1'
-  if (isAvalanche()) return '0x49D5c2BdFfac6CE2BFdB6640F4F80f226bc10bAB'
-  if (isBinance()) return '0x4DB5a66E937A9F4473fA95b1cAF1d1E1D62E29EA'
-  if (isFantom()) return '0x74b23882a30290451A17c44f4F05243b6b58C76d'
-  if (isGnosis()) return '0x6A023CCd1ff6F2045C3309768eAd9E68F978f6e1'
-  if (isGoerli()) return '0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6'
-  if (isMumbai()) return '0xA6FA4fB5f76172d178d61B04b0ecd319C5d1C0aa'
+function getWrappedNativeTokenAddress(): string {
+  if (isMainnet()) return '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2' // WETH
+  if (isPolygon()) return '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270' // WMATIC
+  if (isOptimism()) return '0x4200000000000000000000000000000000000006' // WETH
+  if (isArbitrum()) return '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1' // WETH
+  if (isAvalanche()) return '0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7' // WAVAX
+  if (isBinance()) return '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c' // WBNB
+  if (isFantom()) return '0x21be370D5312f44cB42ce377BC9b8a0cEF1A4C83' // WFTM
+  if (isGnosis()) return '0xe91D153E0b41518A2Ce8Dd3D7944Fa863463a97d' // WXDAI
+  if (isGoerli()) return '0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6' // WETH
+  if (isMumbai()) return '0x9c3C9283D3e44854697Cd22D3Faa240Cfb032889' // WMATIC
   return '0x0000000000000000000000000000000000000000'
 }
 
