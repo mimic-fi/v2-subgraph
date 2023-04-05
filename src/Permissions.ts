@@ -1,6 +1,9 @@
-import { Address, Bytes } from '@graphprotocol/graph-ts'
+import { Address, Bytes, log } from '@graphprotocol/graph-ts'
 
 import { Grantee, Permission } from '../types/schema'
+import { Action as ActionEntity } from '../types/schema'
+import { Action as ActionTemplate } from '../types/templates'
+import { Action as ActionContract } from '../types/templates/Action/Action'
 
 export function processAuthorizedEvent(target: Address, method: Bytes, account: Address): void {
   let permission = loadOrCreatePermission(target, method)
@@ -38,6 +41,7 @@ function loadOrCreatePermission(target: Address, method: Bytes): Permission {
 }
 
 function loadOrCreateGrantee(account: Address): Grantee {
+  tryAction(account)
   let granteeId = account.toHexString()
   let grantee = Grantee.load(granteeId)
 
@@ -48,4 +52,18 @@ function loadOrCreateGrantee(account: Address): Grantee {
   }
 
   return grantee
+}
+
+function tryAction(address: Address): void {
+  let actionContract = ActionContract.bind(address)
+  let smartVaultCall = actionContract.try_smartVault()
+
+  if (!smartVaultCall.reverted) {
+    let action = new ActionEntity(address.toHexString())
+    action.smartVault = smartVaultCall.value.toHexString()
+    action.save()
+
+    log.warning('New smart vault action {}', [address.toHexString()])
+    ActionTemplate.create(address)
+  }
 }

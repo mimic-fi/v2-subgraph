@@ -14,11 +14,18 @@ type SmartVault implements Authorizer @entity {
   totalFeesUsd: BigInt!
   totalGasRefundsUsd: BigInt!
   totalRelayedCostUsd: BigInt!
+  actions: [Action!] @derivedFrom(field: "smartVault")
   fees: [Fee!] @derivedFrom(field: "smartVault")
   balances: [Balance!] @derivedFrom(field: "smartVault")
   transactions: [Transaction!] @derivedFrom(field: "smartVault")
   primitiveExecutions: [PrimitiveExecution!] @derivedFrom(field: "smartVault")
   priceFeeds: [PriceFeed!] @derivedFrom(field: "smartVault")
+  permissions: [Permission!] @derivedFrom(field: "target")
+}
+
+type Action implements Authorizer @entity {
+  id: ID!
+  smartVault: SmartVault!
   permissions: [Permission!] @derivedFrom(field: "target")
 }
 
