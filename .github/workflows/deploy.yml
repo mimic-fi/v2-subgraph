@@ -18,10 +18,20 @@ jobs:
         env:
           GRAPH_KEY: ${{ secrets.GRAPH_KEY }}
         run: yarn deploy:mainnet
-      - name: Notify discord
-        uses: ./.github/actions/notify-discord
+      - name: Job failed
+        if: failure()
+        uses: rjstone/discord-webhook-notify@v1
         with:
-          discord-webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          severity: error
+          details: Job failed!
+          webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
+      - name: Job cancelled
+        if: cancelled()
+        uses: rjstone/discord-webhook-notify@v1
+        with:
+          severity: warn
+          details: Job cancelled!
+          webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
 
   deploy-polygon:
     name: Deploy Polygon
@@ -35,10 +45,20 @@ jobs:
         env:
           GRAPH_KEY: ${{ secrets.GRAPH_KEY }}
         run: yarn deploy:polygon
-      - name: Notify discord
-        uses: ./.github/actions/notify-discord
+      - name: Job failed
+        if: failure()
+        uses: rjstone/discord-webhook-notify@v1
         with:
-          discord-webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          severity: error
+          details: Job failed!
+          webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
+      - name: Job cancelled
+        if: cancelled()
+        uses: rjstone/discord-webhook-notify@v1
+        with:
+          severity: warn
+          details: Job cancelled!
+          webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
 
   deploy-optimism:
     name: Deploy Optimism
@@ -52,10 +72,20 @@ jobs:
         env:
           GRAPH_KEY: ${{ secrets.GRAPH_KEY }}
         run: yarn deploy:optimism
-      - name: Notify discord
-        uses: ./.github/actions/notify-discord
+      - name: Job failed
+        if: failure()
+        uses: rjstone/discord-webhook-notify@v1
         with:
-          discord-webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          severity: error
+          details: Job failed!
+          webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
+      - name: Job cancelled
+        if: cancelled()
+        uses: rjstone/discord-webhook-notify@v1
+        with:
+          severity: warn
+          details: Job cancelled!
+          webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
 
   deploy-arbitrum:
     name: Deploy Arbitrum
@@ -69,10 +99,20 @@ jobs:
         env:
           GRAPH_KEY: ${{ secrets.GRAPH_KEY }}
         run: yarn deploy:arbitrum
-      - name: Notify discord
-        uses: ./.github/actions/notify-discord
+      - name: Job failed
+        if: failure()
+        uses: rjstone/discord-webhook-notify@v1
         with:
-          discord-webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          severity: error
+          details: Job failed!
+          webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
+      - name: Job cancelled
+        if: cancelled()
+        uses: rjstone/discord-webhook-notify@v1
+        with:
+          severity: warn
+          details: Job cancelled!
+          webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
 
   deploy-gnosis:
     name: Deploy Gnosis
@@ -86,10 +126,20 @@ jobs:
         env:
           GRAPH_KEY: ${{ secrets.GRAPH_KEY }}
         run: yarn deploy:gnosis
-      - name: Notify discord
-        uses: ./.github/actions/notify-discord
+      - name: Job failed
+        if: failure()
+        uses: rjstone/discord-webhook-notify@v1
         with:
-          discord-webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          severity: error
+          details: Job failed!
+          webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
+      - name: Job cancelled
+        if: cancelled()
+        uses: rjstone/discord-webhook-notify@v1
+        with:
+          severity: warn
+          details: Job cancelled!
+          webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
 
   deploy-avalanche:
     name: Deploy Avalanche
@@ -103,10 +153,20 @@ jobs:
         env:
           GRAPH_KEY: ${{ secrets.GRAPH_KEY }}
         run: yarn deploy:avalanche
-      - name: Notify discord
-        uses: ./.github/actions/notify-discord
+      - name: Job failed
+        if: failure()
+        uses: rjstone/discord-webhook-notify@v1
         with:
-          discord-webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          severity: error
+          details: Job failed!
+          webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
+      - name: Job cancelled
+        if: cancelled()
+        uses: rjstone/discord-webhook-notify@v1
+        with:
+          severity: warn
+          details: Job cancelled!
+          webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
 
   deploy-fantom:
     name: Deploy Fantom
@@ -120,10 +180,20 @@ jobs:
         env:
           GRAPH_KEY: ${{ secrets.GRAPH_KEY }}
         run: yarn deploy:fantom
-      - name: Notify discord
-        uses: ./.github/actions/notify-discord
+      - name: Job failed
+        if: failure()
+        uses: rjstone/discord-webhook-notify@v1
         with:
-          discord-webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          severity: error
+          details: Job failed!
+          webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
+      - name: Job cancelled
+        if: cancelled()
+        uses: rjstone/discord-webhook-notify@v1
+        with:
+          severity: warn
+          details: Job cancelled!
+          webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
 
   deploy-bsc:
     name: Deploy BSC
@@ -137,10 +207,20 @@ jobs:
         env:
           GRAPH_KEY: ${{ secrets.GRAPH_KEY }}
         run: yarn deploy:bsc
-      - name: Notify discord
-        uses: ./.github/actions/notify-discord
+      - name: Job failed
+        if: failure()
+        uses: rjstone/discord-webhook-notify@v1
         with:
-          discord-webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          severity: error
+          details: Job failed!
+          webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
+      - name: Job cancelled
+        if: cancelled()
+        uses: rjstone/discord-webhook-notify@v1
+        with:
+          severity: warn
+          details: Job cancelled!
+          webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
 
   deploy-goerli:
     name: Deploy Goerli
@@ -154,10 +234,20 @@ jobs:
         env:
           GRAPH_KEY: ${{ secrets.GRAPH_KEY }}
         run: yarn deploy:goerli
-      - name: Notify discord
-        uses: ./.github/actions/notify-discord
+      - name: Job failed
+        if: failure()
+        uses: rjstone/discord-webhook-notify@v1
         with:
-          discord-webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          severity: error
+          details: Job failed!
+          webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
+      - name: Job cancelled
+        if: cancelled()
+        uses: rjstone/discord-webhook-notify@v1
+        with:
+          severity: warn
+          details: Job cancelled!
+          webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
 
   deploy-mumbai:
     name: Deploy Mumbai
@@ -171,7 +261,17 @@ jobs:
         env:
           GRAPH_KEY: ${{ secrets.GRAPH_KEY }}
         run: yarn deploy:mumbai
-      - name: Notify discord
-        uses: ./.github/actions/notify-discord
+      - name: Job failed
+        if: failure()
+        uses: rjstone/discord-webhook-notify@v1
         with:
-          discord-webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          severity: error
+          details: Job failed!
+          webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
+      - name: Job cancelled
+        if: cancelled()
+        uses: rjstone/discord-webhook-notify@v1
+        with:
+          severity: warn
+          details: Job cancelled!
+          webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
