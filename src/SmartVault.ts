@@ -109,16 +109,18 @@ export function handleWithdraw(event: Withdraw): void {
     fee.primitiveExecution = execution.id
     fee.token = tokenIn.id
     fee.amount = event.params.fee
+    fee.amountUsd = rateInUsd(event.params.token, event.params.fee)
     fee.pct = getWithdrawFeePct(event.address)
     fee.feeCollector = getFeeCollector(event.address)
     fee.save()
+
+    smartVault.totalFeesUsd = smartVault.totalFeesUsd.plus(fee.amountUsd)
+    smartVault.save()
+    trackGlobalFees(fee.amountUsd)
   }
 
   let amountUsd = rateInUsd(event.params.token, event.params.withdrawn)
   smartVault.totalValueManaged = smartVault.totalValueManaged.plus(amountUsd)
-
-  let feeUsd = rateInUsd(event.params.token, event.params.fee)
-  smartVault.totalFeesUsd = smartVault.totalFeesUsd.plus(feeUsd)
 
   let isRelayedTx = event.params.data.toHexString() == REDEEM_GAS_NOTE
   transaction.relayer = (isRelayedTx ? event.transaction.from : ZERO_ADDRESS).toHexString()
@@ -131,7 +133,7 @@ export function handleWithdraw(event: Withdraw): void {
   smartVault.totalRelayedCostUsd = smartVault.totalRelayedCostUsd.plus(relayedCostUsd)
   smartVault.save()
 
-  trackGlobalStats(amountUsd, feeUsd, gasRefundUsd, relayedCostUsd)
+  trackGlobalStats(amountUsd, gasRefundUsd, relayedCostUsd)
 }
 
 export function handleWrap(event: Wrap): void {
@@ -257,15 +259,15 @@ export function handleExit(event: Exit): void {
       fee.primitiveExecution = execution.id
       fee.token = tokenOut.id
       fee.amount = fees[i]
+      fee.amountUsd = rateInUsd(tokensOut[i], fees[i])
       fee.pct = getPerformanceFeePct(event.address)
       fee.feeCollector = getFeeCollector(event.address)
       fee.save()
-    }
 
-    let feeUsd = rateInUsd(tokensOut[i], fees[i])
-    smartVault.totalFeesUsd = smartVault.totalFeesUsd.plus(feeUsd)
-    smartVault.save()
-    trackGlobalFees(feeUsd)
+      smartVault.totalFeesUsd = smartVault.totalFeesUsd.plus(fee.amountUsd)
+      smartVault.save()
+      trackGlobalFees(fee.amountUsd)
+    }
   }
 }
 
@@ -295,15 +297,15 @@ export function handleSwap(event: Swap): void {
     fee.primitiveExecution = execution.id
     fee.token = tokenOut.id
     fee.amount = event.params.fee
+    fee.amountUsd = rateInUsd(event.params.tokenOut, event.params.fee)
     fee.pct = getSwapFeePct(event.address)
     fee.feeCollector = getFeeCollector(event.address)
     fee.save()
-  }
 
-  let feeUsd = rateInUsd(event.params.tokenOut, event.params.fee)
-  smartVault.totalFeesUsd = smartVault.totalFeesUsd.plus(feeUsd)
-  smartVault.save()
-  trackGlobalFees(feeUsd)
+    smartVault.totalFeesUsd = smartVault.totalFeesUsd.plus(fee.amountUsd)
+    smartVault.save()
+    trackGlobalFees(fee.amountUsd)
+  }
 }
 
 export function handleBridge(event: Bridge): void {
@@ -331,15 +333,15 @@ export function handleBridge(event: Bridge): void {
     fee.primitiveExecution = execution.id
     fee.token = token.id
     fee.amount = event.params.fee
+    fee.amountUsd = rateInUsd(event.params.token, event.params.fee)
     fee.pct = getBridgeFeePct(event.address)
     fee.feeCollector = getFeeCollector(event.address)
     fee.save()
-  }
 
-  let feeUsd = rateInUsd(event.params.token, event.params.fee)
-  smartVault.totalFeesUsd = smartVault.totalFeesUsd.plus(feeUsd)
-  smartVault.save()
-  trackGlobalFees(feeUsd)
+    smartVault.totalFeesUsd = smartVault.totalFeesUsd.plus(fee.amountUsd)
+    smartVault.save()
+    trackGlobalFees(fee.amountUsd)
+  }
 }
 
 export function handleStrategySet(event: StrategySet): void {
@@ -637,10 +639,20 @@ function createMovement(type: string, event: ethereum.Event, index: number, toke
 }
 
 function trackGlobalFees(feeUsd: BigInt): void {
-  trackGlobalStats(BigInt.zero(), feeUsd, BigInt.zero(), BigInt.zero())
+  let stats = loadOrCreateStats()
+  stats.totalFeesUsd = stats.totalFeesUsd.plus(feeUsd)
+  stats.save()
 }
 
-function trackGlobalStats(valueManagedUsd: BigInt, feeUsd: BigInt, gasRefundUsd: BigInt, relayedCostUsd: BigInt): void {
+function trackGlobalStats(valueManagedUsd: BigInt, gasRefundUsd: BigInt, relayedCostUsd: BigInt): void {
+  let stats = loadOrCreateStats()
+  stats.totalValueManaged = stats.totalValueManaged.plus(valueManagedUsd)
+  stats.totalGasRefundsUsd = stats.totalGasRefundsUsd.plus(gasRefundUsd)
+  stats.totalRelayedCostUsd = stats.totalRelayedCostUsd.plus(relayedCostUsd)
+  stats.save()
+}
+
+function loadOrCreateStats(): Stats {
   let stats = Stats.load('MIMIC_STATS')
 
   if (stats == null) {
@@ -652,11 +664,7 @@ function trackGlobalStats(valueManagedUsd: BigInt, feeUsd: BigInt, gasRefundUsd:
     stats.save()
   }
 
-  stats.totalValueManaged = stats.totalValueManaged.plus(valueManagedUsd)
-  stats.totalFeesUsd = stats.totalFeesUsd.plus(feeUsd)
-  stats.totalGasRefundsUsd = stats.totalGasRefundsUsd.plus(gasRefundUsd)
-  stats.totalRelayedCostUsd = stats.totalRelayedCostUsd.plus(relayedCostUsd)
-  stats.save()
+  return stats
 }
 
 function getSmartVaultId(event: ethereum.Event): string {

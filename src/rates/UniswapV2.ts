@@ -6,15 +6,23 @@ import { UniswapFactoryV2 as UniswapFactory } from '../../types/templates/SmartV
 import { getUsdc, getWrappedNativeToken } from '../Tokens'
 
 const ZERO_ADDRESS = Address.fromString('0x0000000000000000000000000000000000000000')
+const NATIVE_TOKEN_ADDRESS = Address.fromString('0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee')
 
 export function rateInUsdc(token: Address, amount: BigInt, factoryAddress: Address): BigInt {
   const USDC = getUsdc()
+  if (token.equals(USDC)) return amount
+
   const wrappedNativeToken = getWrappedNativeToken()
   const factory = UniswapFactory.bind(factoryAddress)
 
-  if (token.equals(USDC)) return amount
-  if (token.equals(wrappedNativeToken)) return convert(factory, wrappedNativeToken, USDC, amount)
-  return convert(factory, wrappedNativeToken, USDC, convert(factory, token, wrappedNativeToken, amount))
+  const isWrappedOrNative = token.equals(wrappedNativeToken) || token.equals(NATIVE_TOKEN_ADDRESS)
+  if (isWrappedOrNative) return convert(factory, wrappedNativeToken, USDC, amount)
+
+  const usdcAmount = convert(factory, token, USDC, amount)
+  if (!usdcAmount.isZero()) return usdcAmount
+
+  const wethAmount = convert(factory, token, wrappedNativeToken, amount)
+  return convert(factory, wrappedNativeToken, USDC, wethAmount)
 }
 
 function convert(factory: UniswapFactory, tokenIn: Address, tokenOut: Address, amountIn: BigInt): BigInt {

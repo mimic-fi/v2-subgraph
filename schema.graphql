@@ -92,6 +92,7 @@ type Fee @entity {
   pct: BigInt!
   token: ERC20!
   amount: BigInt!
+  amountUsd: BigInt!
   feeCollector: String!
 }
 

@@ -8,16 +8,23 @@ import { getUsdc, getWrappedNativeToken } from '../Tokens'
 
 const POW_2_192 = BigInt.fromI32(2).pow(192)
 const ZERO_ADDRESS = Address.fromString('0x0000000000000000000000000000000000000000')
+const NATIVE_TOKEN_ADDRESS = Address.fromString('0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee')
 
 export const UNISWAP_V3_ROUTER = Address.fromString('0xE592427A0AEce92De3Edee1F18E0157C05861564')
 
 export function rateInUsdc(token: Address, amount: BigInt): BigInt {
   const USDC = getUsdc()
-  const wrappedNativeToken = getWrappedNativeToken()
-
   if (token.equals(USDC)) return amount
-  if (token.equals(wrappedNativeToken)) return convert(wrappedNativeToken, USDC, amount)
-  return convert(wrappedNativeToken, USDC, convert(token, wrappedNativeToken, amount))
+
+  const wrappedNativeToken = getWrappedNativeToken()
+  const isWrappedOrNative = token.equals(wrappedNativeToken) || token.equals(NATIVE_TOKEN_ADDRESS)
+  if (isWrappedOrNative) return convert(wrappedNativeToken, USDC, amount)
+
+  const usdcAmount = convert(token, USDC, amount)
+  if (!usdcAmount.isZero()) return usdcAmount
+
+  const wethAmount = convert(token, wrappedNativeToken, amount)
+  return convert(wrappedNativeToken, USDC, wethAmount)
 }
 
 function convert(tokenIn: Address, tokenOut: Address, amountIn: BigInt): BigInt {
